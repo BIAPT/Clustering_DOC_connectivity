@@ -1,12 +1,22 @@
-% Charlotte Maschke 11.11.2020
-%% Generate time-resolved weighted Phase Lag Index
-% this code is optimized to be run on multiple cores, for example on ComputeCanada
+%% Charlotte Maschke November 11 2020
+% This script goal is to generate the time-resolved wPLI matrices 
+% The matrices will be generated twice: once with overlapping and
+% once with non-overlapping windows in the alpha bandwidth.  
 
-%% Please adapt the following paths to your location: 
-INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/DOC_cluster/data/BASELINE_5min_250Hz/";
-OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/DOC_cluster/results/graphs/";
-NEUROALGO_PATH = "/home/lotte/projects/def-sblain/lotte/DOC_cluster/NeuroAlgo";
+FREQUENCY = "alpha";
+%FREQUENCY = "theta";
+%FREQUENCY = "delta";
+
+
+% Remote Source Setup
+%
+INPUT_DIR = '/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/BASELINE_5min_250Hz';
+OUTPUT_DIR = strcat("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/", FREQUENCY, "/wPLI/");
+NEUROALGO_PATH = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/NeuroAlgo";
 addpath(genpath(NEUROALGO_PATH)); % Add NA library to our path so that we can use it
+
+%just to test
+%INPUT_DIR = 'C:/Users/BIAPT/Desktop/DATA_BASELINE_5min_250Hz';
 
 % This list contains all participant IDs
 P_IDS = {'MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', 'MDFA15', 'MDFA17',...
@@ -14,31 +24,52 @@ P_IDS = {'MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', '
     'WSAS18', 'WSAS19', 'WSAS20', 'WSAS22','WSAS23',...
     'AOMW03','AOMW04','AOMW08','AOMW22','AOMW28','AOMW31','AOMW34','AOMW36'};
 
-filepath = '/Users/BIAPT/Documents/GitHub/Scripts/FC_Clustering_DOC/data/BASELINE_5min_250Hz/';
-fileList = dir(fullfile(filepath, '*.set'));
-data_path = '/Users/BIAPT/Documents/GitHub/Scripts/FC_Clustering_DOC/data/wPLI_10_10_alpha';
+%% wPLI Parameters:
+p_value = 0.05;
+number_surrogate = 10;
 
-
-%for s = 1:len(step_size)
-
-parfor p=1:length(fileList)
-    name = fileList(p).name(1:length(fileList(p).name)-4);
-    recording = load_set(fullfile(filepath, char(fileList(p).name)),'');
-    disp(string(fileList(p).name)+" load complete ========================================" )
-    name = fileList(p).name(1:length(fileList(p).name)-9);
-    
-    % wPLI
-    frequency_band = [8 13]; % This is in Hz
-    window_size = 10; % This is in seconds and will be how we chunk the whole dataset
-    number_surrogate = 10; % Number of surrogate dPLI to create
-    p_value = 0.05; % the p value to make our test on
-    step_size = 10;
-    
-    result_wpli = na_wpli(recording, frequency_band, window_size, step_size, number_surrogate, p_value);
-    result_wpli = result_wpli.data.wpli;
-    save(data_path+"/"+name+"_wPLI_10_1_alpha",'result_wpli')
-    
+if FREQUENCY == "alpha"
+    low_frequency = 8;
+    high_frequency = 13;
+elseif FREQUENCY == "theta"
+    low_frequency = 4;
+    high_frequency = 8;
+elseif FREQUENCY == "delta"
+    low_frequency = 1;
+    high_frequency = 4;
 end
 
 
-    
+% Size of the cuts for the data
+window_size = 10; % in seconds
+%this parameter is set to 1 (overlapping windows)and 10(non-overlapping windows).
+step_sizes = ["01", "10"]; % in seconds
+
+
+%% loop over all particiopants and stepsizes and calculate wPLI
+for s = 1:length(step_sizes)
+    step = step_sizes{s};
+    for p = 1:length(P_IDS)
+        p_id = P_IDS{p};
+        fprintf("Analyzing wPLI of participant '%s' with stepsize '%s' \n", p_id, step);
+        
+        participant_in = strcat(p_id, '_Base_5min.set');
+        participant_out_path = strcat(OUTPUT_DIR,'step',step,'/wPLI_',FREQUENCY,'_step',step,'_',p_id,'.mat');            
+
+        %% Load data
+        recording = load_set(participant_in,INPUT_DIR);
+        
+        if s == "01"
+            step_size = 1;
+        elseif s == "10"
+            step_size = 10;
+        end
+        
+        % calculate wPLI with NEUROALGO
+        frequency_band = [low_frequency high_frequency]; % This is in Hz
+        result_wpli = na_wpli(recording, frequency_band, window_size, step_size, number_surrogate, p_value);
+        save(participant_out_path,'result_wpli')
+
+    end
+end
+
