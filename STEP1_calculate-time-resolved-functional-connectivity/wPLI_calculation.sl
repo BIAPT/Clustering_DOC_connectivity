@@ -15,7 +15,7 @@ module load matlab/2018a
 # Create temporary job info location
 mkdir -p /scratch/$USER/$SLURM_JOB_ID
 
-srun matlab -nodisplay -r "wPLI_for_time_resolved" 
+srun matlab -nodisplay -r "wPLI_for_time_resolved"
 
 # Cleanup
 rm -rf /scratch/$USER/$SLURM_JOB_ID

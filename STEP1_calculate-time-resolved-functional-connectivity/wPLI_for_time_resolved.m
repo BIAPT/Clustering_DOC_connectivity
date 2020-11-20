@@ -51,6 +51,7 @@ for s = 1:length(step_sizes)
     step = step_sizes{s};
     for p = 1:length(P_IDS)
         p_id = P_IDS{p};
+        
         fprintf("Analyzing wPLI of participant '%s' with stepsize '%s' \n", p_id, step);
         
         participant_in = strcat(p_id, '_Base_5min.set');
@@ -59,9 +60,9 @@ for s = 1:length(step_sizes)
         %% Load data
         recording = load_set(participant_in,INPUT_DIR);
         
-        if s == "01"
+        if step == "01"
             step_size = 1;
-        elseif s == "10"
+        elseif step == "10"
             step_size = 10;
         end
         
