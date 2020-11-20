@@ -11,7 +11,7 @@ FREQUENCY = "alpha";
 % Remote Source Setup
 %
 INPUT_DIR = '/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/BASELINE_5min_250Hz';
-OUTPUT_DIR = strcat("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/", FREQUENCY, "/wPLI/");
+OUTPUT_DIR = strcat("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/", FREQUENCY, "/wpli/");
 NEUROALGO_PATH = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/NeuroAlgo";
 addpath(genpath(NEUROALGO_PATH)); % Add NA library to our path so that we can use it
 
