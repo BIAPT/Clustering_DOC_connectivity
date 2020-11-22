@@ -1,32 +1,76 @@
-%% Loading a .set file
-% This will allow to load a .set file into a format that is amenable to analysis
-% The first argument is the name of the .set you want to load and the
-% second argument is the path of the folder containing that .set file
-% Here I'm getting it programmatically because my path and your path will
-% be different.
-%filepath = '/Users/BIAPT/Documents/Time-Resolved-dPLI/DOC/BASELINE_5min_250Hz/';
-filepath = '/Users/BIAPT/Documents/GitHub/Scripts/FC_Clustering_DOC/data/BASELINE_5min_250Hz/';
-fileList = dir(fullfile(filepath, '*.set'));
-%fileList = filepath('*.set');
+%% Charlotte Maschke November 11 2020
+% This script goal is to generate the time-resolved dPLI matrices 
+% The matrices will be generated twice: once with overlapping and
+% once with non-overlapping windows in the alpha bandwidth.  
 
-data_path = '/Users/BIAPT/Documents/GitHub/Scripts/FC_Clustering_DOC/data/dPLI_10_10_alpha';
+FREQUENCY = "alpha";
+%FREQUENCY = "theta";
+%FREQUENCY = "delta";
 
-for p=1:length(fileList)
-    name = fileList(p).name(1:length(fileList(p).name)-4);
-    recording = load_set(fullfile(filepath, char(fileList(p).name)),'');
-    disp(string(fileList(p).name)+" load complete ========================================" )
-    name = fileList(p).name(1:length(fileList(p).name)-9);
-    
-    % dPLI
-    frequency_band = [8 13]; % This is in Hz
-    window_size = 10; % This is in seconds and will be how we chunk the whole dataset
-    number_surrogate = 10; % Number of surrogate dPLI to create
-    p_value = 0.05; % the p value to make our test on
-    step_size = 10;
-    
-    result_dPLI = na_dPLI(recording, frequency_band, window_size, step_size, number_surrogate, p_value);
-    result_dPLI = result_dPLI.data.dPLI;
-    save(data_path+"/"+name+"_dPLI_10_1_alpha",'result_dPLI')
-    
+
+% Remote Source Setup
+%
+INPUT_DIR = '/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/BASELINE_5min_250Hz';
+OUTPUT_DIR = strcat("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/", FREQUENCY, "/dpli/");
+NEUROALGO_PATH = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/NeuroAlgo";
+addpath(genpath(NEUROALGO_PATH)); % Add NA library to our path so that we can use it
+
+%just to test
+%INPUT_DIR = 'C:/Users/BIAPT/Desktop/DATA_BASELINE_5min_250Hz';
+
+% This list contains all participant IDs
+P_IDS = {'MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', 'MDFA15', 'MDFA17',...
+    'WSAS02', 'WSAS05', 'WSAS07', 'WSAS09', 'WSAS10', 'WSAS11', 'WSAS12', 'WSAS13','WSAS15','WSAS16','WSAS17',...
+    'WSAS18', 'WSAS19', 'WSAS20', 'WSAS22','WSAS23',...
+    'AOMW03','AOMW04','AOMW08','AOMW22','AOMW28','AOMW31','AOMW34','AOMW36'};
+
+%% dPLI Parameters:
+p_value = 0.05;
+number_surrogate = 10;
+
+if FREQUENCY == "alpha"
+    low_frequency = 8;
+    high_frequency = 13;
+elseif FREQUENCY == "theta"
+    low_frequency = 4;
+    high_frequency = 8;
+elseif FREQUENCY == "delta"
+    low_frequency = 1;
+    high_frequency = 4;
+end
+
+
+% Size of the cuts for the data
+window_size = 10; % in seconds
+%this parameter is set to 1 (overlapping windows)and 10(non-overlapping windows).
+step_sizes = ["01", "10"]; % in seconds
+
+
+%% loop over all particiopants and stepsizes and calculate dPLI
+for s = 1:length(step_sizes)
+    step = step_sizes{s};
+    for p = 1:length(P_IDS)
+        p_id = P_IDS{p};
+        
+        fprintf("Analyzing dPLI of participant '%s' with stepsize '%s' \n", p_id, step);
+        
+        participant_in = strcat(p_id, '_Base_5min.set');
+        participant_out_path = strcat(OUTPUT_DIR,'step',step,'/dPLI_',FREQUENCY,'_step',step,'_',p_id,'.mat');            
+
+        %% Load data
+        recording = load_set(participant_in,INPUT_DIR);
+        
+        if step == "01"
+            step_size = 1;
+        elseif step == "10"
+            step_size = 10;
+        end
+        
+        % calculate dPLI with NEUROALGO
+        frequency_band = [low_frequency high_frequency]; % This is in Hz
+        result_dpli = na_dpli(recording, frequency_band, window_size, step_size, number_surrogate, p_value);
+        save(participant_out_path,'result_dpli')
+
+    end
 end
 

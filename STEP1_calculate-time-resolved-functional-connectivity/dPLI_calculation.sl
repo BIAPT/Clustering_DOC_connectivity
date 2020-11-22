@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --job-name=wpli-time-resolved
+#SBATCH --job-name=dpli-time-resolved
 #SBATCH --account=def-sblain # adjust this to match the accounting group you are using to submit jobs
 #SBATCH --time=0-06:00:00        # adjust this to match the walltime of your job (D-HH:MM:SS)
 #SBATCH --nodes=1     
@@ -15,7 +15,7 @@ module load matlab/2018a
 # Create temporary job info location
 mkdir -p /scratch/$USER/$SLURM_JOB_ID
 
-srun matlab -nodisplay -r "wPLI_for_time_resolved"
+srun matlab -nodisplay -r "dPLI_for_time_resolved"
 
 # Cleanup
 rm -rf /scratch/$USER/$SLURM_JOB_ID
