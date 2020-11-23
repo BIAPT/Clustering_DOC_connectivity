@@ -52,6 +52,47 @@ for s = 1:length(step_sizes)
     for p = 1:length(P_IDS)
         p_id = P_IDS{p};
         
+        
+    %% Getting the configuration
+    configuration = get_configuration();
+    
+    %% Setting Result
+    result = Result('wpli', recording);
+    result.parameters.frequency_band = frequency_band;
+    result.parameters.window_size = window_size;
+    result.parameters.step_size = step_size;
+    result.parameters.number_surrogate = number_surrogate;
+    result.parameters.p_value = p_value;
+    
+    
+    %% Filtering the data
+    print_message(strcat("Filtering Data from ",string(frequency_band(1)), "Hz to ", string(frequency_band(2)), "Hz."),configuration.is_verbose);
+    recording = recording.filter_data(recording.data, frequency_band);
+    
+    % Here we init the sliding window slicing 
+    recording = recording.init_sliding_window(window_size, step_size);
+    number_window = recording.max_number_window;
+    
+    %% Calculation on the windowed segments
+    result.data.wpli = zeros(number_window, recording.number_channels, recording.number_channels);
+    for i = 1:number_window
+       print_message(strcat("wPLI at window: ",string(i)," of ", string(number_window)),configuration.is_verbose); 
+       [recording, segment_data] = recording.get_next_window();
+       
+       segment_wpli = wpli(segment_data, number_surrogate, p_value); 
+       result.data.wpli(i,:,:) = segment_wpli;
+    end
+    
+    %% Average wPLI
+    result.data.avg_wpli = squeeze(mean(result.data.wpli,1));
+    
+        
+        
+        
+        
+        
+        
+        
         fprintf("Analyzing wPLI of participant '%s' with stepsize '%s' \n", p_id, step);
         
         participant_in = strcat(p_id, '_Base_5min.set');
@@ -67,44 +108,9 @@ for s = 1:length(step_sizes)
         end
         
         % calculate wPLI with NEUROALGO
-        
-        %% Getting the configuration
-        configuration = get_configuration();
-
-        %% Setting Result
-        result = Result('wpli', recording);
-        result.parameters.frequency_band = frequency_band;
-        result.parameters.window_size = window_size;
-        result.parameters.step_size = step_size;
-        result.parameters.number_surrogate = number_surrogate;
-        result.parameters.p_value = p_value;
-
-    
-        %% Filtering the data
-        print_message(strcat("Filtering Data from ",string(frequency_band(1)), "Hz to ", string(frequency_band(2)), "Hz."),configuration.is_verbose);
-        recording = recording.filter_data(recording.data, frequency_band);
-
-        % Here we init the sliding window slicing 
-        recording = recording.init_sliding_window(window_size, step_size);
-        number_window = recording.max_number_window;
-
-        %% Calculation on the windowed segments
-        result.data.wpli = zeros(number_window, recording.number_channels, recording.number_channels);
-        parfor i = 1:number_window
-           print_message(strcat("wPLI at window: ",string(i)," of ", string(number_window)),configuration.is_verbose); 
-           [recording, segment_data] = recording.get_next_window();
-
-           segment_wpli = wpli(segment_data, number_surrogate, p_value); 
-           result.data.wpli(i,:,:) = segment_wpli;
-        end
-
-        %% Average wPLI
-        result.data.avg_wpli = squeeze(mean(result.data.wpli,1));
-
-        
-        %frequency_band = [low_frequency high_frequency]; % This is in Hz
-        %result_wpli = na_wpli(recording, frequency_band, window_size, step_size, number_surrogate, p_value);
-        save(participant_out_path,'result')
+        frequency_band = [low_frequency high_frequency]; % This is in Hz
+        result_wpli = na_wpli(recording, frequency_band, window_size, step_size, number_surrogate, p_value);
+        save(participant_out_path,'result_wpli')
 
     end
 end
