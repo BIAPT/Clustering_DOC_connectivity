@@ -43,7 +43,8 @@ end
 % Size of the cuts for the data
 window_size = 10; % in seconds
 %this parameter is set to 1 (overlapping windows)and 10(non-overlapping windows).
-step_sizes = ["01", "10"]; % in seconds
+%step_sizes = ["01", "10"]; % in seconds
+step_sizes = ["10"]; % in seconds
 
 
 %% loop over all particiopants and stepsizes and calculate wPLI
