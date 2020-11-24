@@ -17,6 +17,7 @@ healthy ='Yes'
 KS = [6]
 PC = 5
 
+OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Clustering_DOC/results/";
 
 def get_data(mode):
     # import data
