@@ -33,7 +33,7 @@ def extract_single_features(X_step, channels, selection_1, selection_2, time):
                 if done.__contains__(str(b)+'_'+str(a)) == False:
                     #X_step[min(a, b), max(a, b)] = 200  # !! Just activate for test purpose
                     PLI.append(X_step[min(a, b), max(a, b)])
-                    print(channels[a],channels[b],X_step[min(a, b), max(a, b)])
+                    #print(channels[a],channels[b],X_step[min(a, b), max(a, b)])
 
     return np.mean(PLI), missing
 

@@ -9,6 +9,23 @@ from helper_functions.General_Information import *
 
 pdf = matplotlib.backends.backend_pdf.PdfPages("SI_SIL_33part_wholebrain_wPLI_30_10_allfrequ.pdf")
 
+FREQUENCY = ["alpha", "theta", "delta"]
+STEP = ["10", "01"]
+MODE = ["wpli", "dpli"]
+
+df_wpli_final.to_pickle(OUTPUT_DIR + "33_Part_{}_10_{}_{}.pickle".format(mode, step, frequency), protocol=4)
+
+for frequency in FREQUENCY:
+    for step in STEP:
+        for mode in MODE:
+            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/"
+            INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/{}/{}/step{}".format(frequency, mode, step)
+            for p_id in P_IDS:
+                part_in = INPUT_DIR +"/{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
+                part_channels = INPUT_DIR +"/{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
+
+
+
 # random data
 mean = np.mean(X)
 std = np.std(X)
