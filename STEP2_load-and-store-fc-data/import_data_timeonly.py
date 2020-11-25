@@ -57,12 +57,14 @@ for frequency in FREQUENCY:
 
                 data = scipy.io.loadmat(part_in)['{}_tofill'.format(mode)]
                 channel = scipy.io.loadmat(part_channels)['channels'][0][0]
+                print('Load data comlpete {}PLI_{}_step{}_{}_channels'.format(mode[0], frequency, step, p_id))
 
                 channels = []
                 for a in range(0,len(channel)):
                     channels.append(channel[a][0])
                 channels = np.array(channels)
 
+                # change the channel notation from 'Fp2 to E9'
                 if p_id != 'WSAS02':
                     channels[np.where(channels == 'Fp2')] = 'E9'
                     channels[np.where(channels == 'Fz')] = 'E11'
@@ -88,7 +90,7 @@ for frequency in FREQUENCY:
 
                 # create empty dataframe to fill
                 # name wpli but can also contain dpli, depending on mode
-                df_wpli_final=pd.DataFrame()
+                df_wpli_final = pd.DataFrame()
                 ID = p_id[3:6]
 
                 names = ROI.copy()
@@ -163,7 +165,7 @@ for frequency in FREQUENCY:
 
                         i += 1
 
-                df_wpli_final=df_wpli_final.append(df_wpli)
+                df_wpli_final = df_wpli_final.append(df_wpli)
                 print( "Participant" + name + "   finished")
                 print("missing electrodes: " + str(list(set(missingel))))
 
