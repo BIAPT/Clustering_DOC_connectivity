@@ -13,7 +13,8 @@ import sys
 #sys.path.append(os.path.abspath(scriptpath))
 
 
-FREQUENCY = ["alpha", "theta", "delta"]
+#FREQUENCY = ["alpha", "theta", "delta"]
+FREQUENCY = ["delta"]
 STEP = ["10", "01"]
 MODE = ["wpli", "dpli"]
 

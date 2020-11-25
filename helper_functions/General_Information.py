@@ -21,7 +21,7 @@ OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Clustering_DOC/results/";
 
 def get_data(mode):
     # import data
-    data = pd.read_pickle('../data/33_Part_WholeBrain_{}_10_1_alpha.pickle'.format(mode))
+    data = pd.read_pickle('data/33_Part_WholeBrain_{}_10_1_alpha.pickle'.format(mode))
 
     # combine both sets
     data = data.query("Phase=='Base'")
