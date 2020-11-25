@@ -16,8 +16,8 @@ NEUROALGO_PATH = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/NeuroAlgo";
 addpath(genpath(NEUROALGO_PATH)); % Add NA library to our path so that we can use it
 
 %just to test
-%INPUT_DIR = 'C:/Users/BIAPT/Desktop/DATA_BASELINE_5min_250Hz';
-%OUTPUT_DIR = 'C:/Users/BIAPT/Desktop/';
+INPUT_DIR = 'C:/Users/BIAPT/Desktop/DATA_BASELINE_5min_250Hz';
+OUTPUT_DIR = 'C:/Users/BIAPT/Desktop/';
 
 % This list contains all participant IDs
 P_IDS = {'MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', 'MDFA15', 'MDFA17',...
