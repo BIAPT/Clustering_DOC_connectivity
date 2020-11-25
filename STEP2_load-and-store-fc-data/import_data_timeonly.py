@@ -49,8 +49,8 @@ ROI = ['LF_LC', 'LF_LP', 'LF_LO', 'LF_LT',
 for frequency in FREQUENCY:
     for step in STEP:
         for mode in MODE:
-            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Clustering_DOC/results/"
-            INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Clustering_DOC/results/{}/{}/step{}".format(frequency, mode, step)
+            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/"
+            INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/{}/{}/step{}".format(frequency, mode, step)
             for p_id in P_IDS:
                 part_in = INPUT_DIR +"/{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
                 part_channels = INPUT_DIR +"/{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
