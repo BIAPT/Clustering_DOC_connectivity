@@ -2,45 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-def extract_features (data,getmean=False):
-    data=data
-
-    # Calculate nr of features with gaussian sum formula
-    # because we don't take the diagonal as a feature
-    nr_electrodes = data.shape[1]
-    nr_features = int(((nr_electrodes - 1) ** 2 + (nr_electrodes - 1)) / 2)
-
-    # create empty dataframe for features
-    tofill = np.zeros((data.shape[0], nr_features))
-
-    if len(data.shape)==3:
-        timesteps=data.shape[0]
-
-        # fill rows with diagonals features
-        for t in range(0, timesteps):
-            tmp = []
-            for e in range(1, nr_electrodes):
-                tmp.extend(data[t].diagonal(e))
-            tofill[t, :] = tmp
-        if getmean == True:
-            tofill = np.mean(tofill, axis=1)
-
-    if len(data.shape) == 2:
-        timesteps = 1
-
-        # fill rows with diagonals features
-        tmp = []
-        for e in range(1, nr_electrodes):
-            tmp.extend(data.diagonal(e))
-        tofill = tmp
-
-        if getmean == True:
-            tofill = np.mean(tofill, axis=0)
-
-    return tofill
-
-
-def extract_single_features(X_step,channels,selection_1,selection_2,name,time):
+def extract_single_features(X_step, channels, selection_1, selection_2, time):
 
     missing = []
     selected_1 = []
@@ -61,21 +23,20 @@ def extract_single_features(X_step,channels,selection_1,selection_2,name,time):
                 missing.append(str(selection_2[i]))
 
     PLI = []
+    done = []
+
     for a in selected_1:
         for b in selected_2:
             if a != b:
-                PLI.append(X_step[min(a, b), max(a, b)])
+                done.append(str(a)+'_'+str(b))
+                # if the inverse connectivity is not in the data already:
+                if done.__contains__(str(b)+'_'+str(a)) == False:
+                    #X_step[min(a, b), max(a, b)] = 200  # !! Just activate for test purpose
+                    PLI.append(X_step[min(a, b), max(a, b)])
+                    print(channels[a],channels[b],X_step[min(a, b), max(a, b)])
 
     return np.mean(PLI), missing
 
-
-def get_difference(data):
-
-    tofill = np.zeros((data.shape[0]-1, data.shape[1]))
-    for i in range(0,data.shape[0]-1):
-        j = i + 1
-        tofill[i,:]= data[j]-data[i]
-    return tofill
 
 
 
