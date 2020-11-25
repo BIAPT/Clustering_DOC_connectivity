@@ -3,9 +3,9 @@
 % The matrices will be generated twice: once with overlapping and
 % once with non-overlapping windows in the alpha bandwidth.  
 
-FREQUENCY = "alpha";
+%FREQUENCY = "alpha";
 %FREQUENCY = "theta";
-%FREQUENCY = "delta";
+FREQUENCY = "delta";
 
 
 % Remote Source Setup
@@ -110,8 +110,8 @@ for s = 1:length(step_sizes)
         
         channels = struct2cell(result.metadata.channels_location);
 
-        %% Average wPLI
-        %result.data.avg_wpli = squeeze(mean(result.data.wpli,1));
+        %% Average dpli
+        %result.data.avg_dpli = squeeze(mean(result.data.dpli,1));
         save(participant_out_path,'dpli_tofill')
         save(participant_channel_path,'channels')
     end
