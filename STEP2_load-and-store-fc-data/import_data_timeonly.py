@@ -13,8 +13,7 @@ import sys
 #sys.path.append(os.path.abspath(scriptpath))
 
 
-#FREQUENCY = ["alpha", "theta", "delta"]
-FREQUENCY = ["delta"]
+FREQUENCY = ["alpha", "theta", "delta"]
 STEP = ["10", "01"]
 MODE = ["wpli", "dpli"]
 
@@ -50,7 +49,7 @@ ROI = ['LF_LC', 'LF_LP', 'LF_LO', 'LF_LT',
 for frequency in FREQUENCY:
     for step in STEP:
         for mode in MODE:
-            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/"
+            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/features"
             INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/{}/{}/step{}".format(frequency, mode, step)
             for p_id in P_IDS:
                 part_in = INPUT_DIR +"/{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)

@@ -5,16 +5,25 @@ sys.path.append('../')
 from helper_functions import stability_measure
 from matplotlib import pyplot as plt
 import matplotlib.backends.backend_pdf
-from helper_functions.General_Information import *
+import helper_functions.General_Information as general
+import joblib
+import numpy as np
+import pandas as pd
 
+mode = 'wpli'
+frequency='alpha'
+healthy = 'Yes'
+value = 'Diag'
+step = '01'
 
-pdf = matplotlib.backends.backend_pdf.PdfPages("SI_SIL_33part_wholebrain_wPLI_30_10_allfrequ.pdf")
+OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/stability/"
 
-# random data
-mean = np.mean(X)
-std = np.std(X)
+_, data, X, Y_out, _, _ = general.load_data(mode, frequency, step, healthy, value)
 
-data_random= np.random.normal(mean, std, size=X.shape)
+pdf = matplotlib.backends.backend_pdf.PdfPages(OUTPUT_DIR+"SI_SIS_healthy_{}_{}_10_{}_{}.pdf".format(healthy, mode, step, frequency))
+
+# random data with same characteristics as X
+data_random= np.random.normal(np.mean(X), np.std(X), size=X.shape)
 Y_ID_random = data['ID']
 Y_ID = data['ID']
 
@@ -23,14 +32,15 @@ Stability Index
 """
 P=[3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
 K=[2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
-Rep=20                               #number of Repetitions (Mean at the end)
+Rep=10                               #number of Repetitions (Mean at the end)
 
-[SI_M_rand, SI_SD_rand] = stability_measure.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
-[SI_M_Base, SI_SD_Base] = stability_measure.compute_stability_index(X, Y_ID, P, K, Rep)
+with joblib.parallel_backend('loky'):
+    [SI_M_rand, SI_SD_rand] = stability_measure.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
+    [SI_M_Base, SI_SD_Base] = stability_measure.compute_stability_index(X, Y_ID, P, K, Rep)
 
-fig,a =  plt.subplots(2, 2)
-plt.setp(a, xticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] , xticklabels=['2', '3', '4', '5', '6', '7', '8', '9', '10'],
-        yticks=[0, 1, 2, 3, 4, 5, 6, 7, 8], yticklabels= ['3', '4', '5', '6', '7', '8', '9', '10'],
+fig,a = plt.subplots(2, 2)
+plt.setp(a, xticks=[0, 1, 2, 3, 4, 5, 6, 7, 8], xticklabels=['2', '3', '4', '5', '6', '7', '8', '9', '10'],
+        yticks=[0, 1, 2, 3, 4, 5, 6, 7], yticklabels= ['3', '4', '5', '6', '7', '8', '9', '10'],
          xlabel= 'K-Clusters',ylabel='Principle Components')
 
 im=a[0][0].imshow(np.transpose(SI_M_rand))
@@ -62,8 +72,11 @@ plt.show()
 
 pdf.savefig(fig)
 
-pd.DataFrame(SI_M_Base).to_pickle('SI_Base_33part_wPLI_30_10_allfr.pickle')
-pd.DataFrame(SI_M_rand).to_pickle('SI_rand_33part_wPLI_30_10_allfr.pickle')
+pd.DataFrame(SI_M_Base).to_pickle(OUTPUT_DIR+
+                                  "SI_MEAN_healthy_{}_{}_10_{}_{}.pdf".format(healthy, mode, step, frequency))
+
+pd.DataFrame(SI_SD_Base).to_pickle(OUTPUT_DIR+
+                                  "SI_SD_healthy_{}_{}_10_{}_{}.pdf".format(healthy, mode, step, frequency))
 
 
 """
@@ -72,8 +85,9 @@ Silhouette Score
 P=[3, 4, 5, 6, 7, 8, 9, 10]        #number of Principal components to iterate
 K=[2, 3, 4, 5, 6, 7, 8, 9, 10]     #number of K-clusters to iterate
 
-SIS_Rand = stability_measure.compute_silhouette_score(data_random, P, K)
-SIS_Base = stability_measure.compute_silhouette_score(X, P, K)
+with joblib.parallel_backend('loky'):
+    SIS_Rand = stability_measure.compute_silhouette_score(data_random, P, K)
+    SIS_Base = stability_measure.compute_silhouette_score(X, P, K)
 
 fig, a = plt.subplots(1, 2)
 plt.setp(a, xticks=[0,1,2,3,4,5,6,7,8,9] , xticklabels=['2','3','4','5','6','7','8','9','10'],
@@ -98,5 +112,7 @@ pdf.savefig(fig)
 pdf.close()
 
 
-pd.DataFrame(SIS_Base).to_pickle('SIS_Base_33part_wPLI_30_10_allfr.pickle')
-pd.DataFrame(SIS_Rand).to_pickle('SIS_rand_33part_wPLI_30_10_allfr.pickle')
+pd.DataFrame(SIS_Base).to_pickle(OUTPUT_DIR+
+                                 "SI_SIS_healthy_{}_{}_10_{}_{}.pickle".format(healthy, mode, step, frequency))
+
+#pd.DataFrame(SIS_Rand).to_pickle('SIS_rand_33part_wPLI_30_10_allfr.pickle')
