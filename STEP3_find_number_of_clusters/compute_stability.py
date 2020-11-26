@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Qt5Agg')
+#matplotlib.use('Qt5Agg')
 import sys
 sys.path.append('../')
 from helper_functions import stability_measure
