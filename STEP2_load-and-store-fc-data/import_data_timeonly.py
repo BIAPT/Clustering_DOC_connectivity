@@ -51,6 +51,9 @@ for frequency in FREQUENCY:
         for mode in MODE:
             OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/features"
             INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/{}/{}/step{}".format(frequency, mode, step)
+            # empty dataframe for all participants
+            df_wpli_final = pd.DataFrame()
+
             for p_id in P_IDS:
                 part_in = INPUT_DIR +"/{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
                 part_channels = INPUT_DIR +"/{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
@@ -90,7 +93,6 @@ for frequency in FREQUENCY:
 
                 # create empty dataframe to fill
                 # name wpli but can also contain dpli, depending on mode
-                df_wpli_final = pd.DataFrame()
                 ID = p_id[3:6]
 
                 names = ROI.copy()
@@ -104,8 +106,7 @@ for frequency in FREQUENCY:
                 missingel = []
                 time_steps=data.shape[0]
 
-                wpli = np.zeros((time_steps,len(names))) # +4 for ID, State, Time, name +5 intra regional
-                df_wpli = pd.DataFrame(wpli)
+                df_wpli = pd.DataFrame(np.zeros((time_steps,len(names))))
 
                 name = "{}_Base".format(p_id)
                 df_wpli.iloc[:,0] = name
@@ -147,8 +148,6 @@ for frequency in FREQUENCY:
                     regions['RO'] = ['POz', 'PO4', 'PO8', 'Oz', 'O2']
                     regions['RT'] = ['FT8', 'T8', 'TP8']
 
-
-
                 for t in range(0, time_steps):
                     df_wpli.iloc[t, 3] = t
                     i = 4   # Position in DataFrame: 0-3 are 'Name','ID','Phase','Time'
@@ -166,7 +165,7 @@ for frequency in FREQUENCY:
                         i += 1
 
                 df_wpli_final = df_wpli_final.append(df_wpli)
-                print( "Participant" + name + "   finished")
+                print("Participant" + name + "   finished")
                 print("missing electrodes: " + str(list(set(missingel))))
 
             df_wpli_final.columns = names

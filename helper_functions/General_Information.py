@@ -25,6 +25,10 @@ def get_data(mode, frequency, step):
 
     # import data
     data = pd.read_pickle(INPUT_DIR+"33_Part_{}_10_{}_{}.pickle".format(mode, step, frequency))
+    #data = pd.read_pickle("data/33_Part_wpli_10_01_alpha.pickle")
+    #data = pd.read_csv("data/33_Part_wpli_10_01_alpha.csv")
+    #if data.columns[0] != 'Name':
+    #    del data['Unnamed: 0']
 
     # combine both sets
     data = data.query("Phase=='Base'")
