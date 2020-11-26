@@ -24,9 +24,7 @@ def get_data(mode, frequency, step):
     INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/features/"
 
     # import data
-    data = pd.read_pickle(INPUT_DIR+"33_Part_{}_10_{}_{}.pickle".format(mode, step, frequency))
-    #data = pd.read_pickle("data/features33_Part_wpli_10_01_alpha.pickle")
-    data = pd.read_csv("data/features33_Part_wpli_10_01_alpha.csv")
+    data = pd.read_csv(INPUT_DIR+"33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
     if data.columns[0] != 'Name':
         del data[data.columns[0]]
 
