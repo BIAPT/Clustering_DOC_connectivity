@@ -11,6 +11,8 @@ from sklearn.metrics import silhouette_score
 import random
 import joblib
 from numpy import unravel_index
+#from multiprocessing import Pool
+
 
 def compute_stability_index(X,Y_ID,P,K,Rep):
 
@@ -28,6 +30,7 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
         X_test = X[np.isin(Y_ID, rand_test)]
 
         for p in P:
+
             # fit the pca on the complete dataset and transfor the divided sets
             pca = PCA(n_components=p)
             pca.fit(x_complete)
@@ -35,11 +38,11 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
             X_test_LD = pca.transform(X_test) # and X_test
 
             for k in K:
-                kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=1000)
+                kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=1000, n_jobs=-1)
                 kmeans.fit(X_temp_LD)           #fit the classifier on X_template
                 S_temp = kmeans.predict(X_test_LD)
 
-                kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=100)
+                kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=1000, n_jobs=-1)
                 kmeans.fit(X_test_LD)           #fit the classifier on X_test
                 S_test = kmeans.predict(X_test_LD)
 
@@ -86,7 +89,7 @@ def compute_silhouette_score(X,P,K):
         X_LD = pca.transform(X)
 
         for k in K:
-            kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=100)
+            kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=1000, n_jobs=-1)
             kmeans.fit(X_LD)  # fit the classifier on all X_LD
             S = kmeans.predict(X_LD)
             silhouette = silhouette_score(X_LD, S)
