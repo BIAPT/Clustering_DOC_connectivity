@@ -18,4 +18,4 @@ pip install --no-index scikit-learn
 pip install --no-index pandas
 pip install --no-index matplotlib
 pip install --no-index seaborn
-python import_data_timeonly.py
+python -u import_data_timeonly.py
