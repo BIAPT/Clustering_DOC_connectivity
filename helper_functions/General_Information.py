@@ -21,7 +21,7 @@ import numpy as np
 
 
 def get_data(mode, frequency, step):
-    INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/features/"
+    INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/features/"
 
     # import data
     data = pd.read_pickle(INPUT_DIR+"33_Part_{}_10_{}_{}.pickle".format(mode, step, frequency))
