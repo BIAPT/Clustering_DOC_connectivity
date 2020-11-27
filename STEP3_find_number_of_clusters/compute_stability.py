@@ -17,7 +17,7 @@ step = '01'
 
 OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/stability/"
 
-_, data, X, Y_out, _, _ = general.load_data(mode, frequency, step, healthy, value)
+_, data, X, Y_out, _, _, _, _ = general.load_data(mode, frequency, step, healthy, value)
 
 pdf = matplotlib.backends.backend_pdf.PdfPages(OUTPUT_DIR+"SI_SIS_healthy_{}_{}_10_{}_{}.pdf".format(healthy, mode, step, frequency))
 

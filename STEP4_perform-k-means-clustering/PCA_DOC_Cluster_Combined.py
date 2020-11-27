@@ -6,15 +6,40 @@ from sklearn.cluster import KMeans
 import matplotlib.backends.backend_pdf
 import seaborn as sns
 from helper_functions import visualize
-from helper_functions.General_Information import *
 import helper_functions.process_properties as prop
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
+import helper_functions.General_Information as general
 import scipy
+import numpy as np
+import pandas as pd
 
-pdf = matplotlib.backends.backend_pdf.PdfPages("../KMC_33_Part_{}_{}_10_1_K6_alpha_heathy_{}.pdf".format(
-    value, mode, healthy))
+mode = 'wPLI'
+#mode = 'dPLI'
+
+healthy ='Yes'
+#healthy ='No'
+
+#step = "01"
+step = "10"
+
+frequency = 'alpha'
+
+model = 'K-means'
+#model = 'HMM'
+
+#value= 'Diag'
+value= 'Prog'
+
+# number of Clusters/ Phases to explore
+KS = [6]
+PC = 5
+
+AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames = general.load_data(mode, frequency, step, healthy, value)
+
+
+pdf = matplotlib.backends.backend_pdf.PdfPages("../test.pdf")
 
 """
     PCA - all_participants
@@ -23,7 +48,7 @@ pca = PCA(n_components=3)
 pca.fit(X)
 X3 = pca.transform(X)
 
-visualize.plot_pca_results(pdf,X3,Y_out, groupnames)
+visualize.plot_pca_results(pdf, X3, Y_out, groupnames, healthy)
 print("#######  PCA Completed ")
 
 """
@@ -40,7 +65,7 @@ for k in KS:
     P_kmc=kmc.predict(X7)
 
     visualize.plot_explained_variance(pdf,pca)
-    visualize.plot_clustered_pca(pdf,X3,Y_out,P_kmc,k,groupnames)
+    visualize.plot_clustered_pca(pdf,X3,Y_out,P_kmc,k,groupnames, healthy)
 
     for part in AllPart["Part"]:
 
@@ -94,7 +119,7 @@ for k in KS:
         g = g.plot_joint(sns.regplot, color="xkcd:muted blue")
         plt.xlabel("state {}".format(s))
         g = g.plot_marginals(sns.distplot, kde=False, bins=12, color="xkcd:bluey grey")
-        g.ax_joint.text(0.2, 0.9 , 'r = {0:.2f}, p = {0:.2f}'.format(r,p), fontstyle='italic')
+        g.ax_joint.text(0.2, 0.9, 'r = {0:.2f}, p = {0:.2f}'.format(r,p), fontstyle='italic')
         plt.tight_layout()
         pdf.savefig()
         plt.close()
@@ -158,7 +183,6 @@ for k in KS:
         dyn_CRSR.insert (0, "CRSR", list(map(float, CRSR_value)))
 
     r, p = scipy.stats.pearsonr(np.array(dyn_CRSR['p_switch']), np.array(dyn_CRSR['CRSR']))
-    r, p = scipy.stats.pearsonr(np.array(dyn_CRSR['p_switch']), np.array(dyn_CRSR['CRSR']))
     sns.set(style='white', font_scale=1.2)
     g = sns.JointGrid(data=dyn_CRSR, x='p_switch', y='CRSR')
     g = g.plot_joint(sns.regplot, color="xkcd:muted blue")
@@ -174,7 +198,7 @@ for k in KS:
         Phase Transition
     """
     # groupwise Phase Transition
-    visualize.plot_group_TPM(P_kmc,Y_out,k,pdf,groupnames)
+    visualize.plot_group_TPM(P_kmc,Y_out,k,pdf,groupnames, healthy)
 
     # individual Phase Transition
     for group in partnames:
@@ -191,7 +215,7 @@ for k in KS:
         plt.close()
 
     # group averaged Phase Transition
-    visualize.plot_group_averaged_TPM(AllPart,P_kmc,Y_out,k,pdf,data,partnames,groupnames)
+    visualize.plot_group_averaged_TPM(AllPart,P_kmc,Y_out,k,pdf,data,partnames,groupnames, healthy)
 
 pdf.close()
 print('finished')

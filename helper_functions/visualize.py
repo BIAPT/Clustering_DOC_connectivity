@@ -8,12 +8,11 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
 import helper_functions.process_properties as prop
-from helper_functions.General_Information import healthy
 
 def plot_connectivity(X_conn, mode):
     regions = ['LF','LC','LP','LO','LT','RF','RC','RP','RO','RT']
     conn_matrix = np.zeros((len(regions), len(regions)))
-    coords = np.loadtxt('../helper_functions/coordinates.txt')
+    coords = np.loadtxt('helper_functions/coordinates.txt')
 
     for t in range(len(X_conn)):
         tmp = X_conn
@@ -48,7 +47,7 @@ def plot_connectivity(X_conn, mode):
 
     return fig
 
-def plot_pca_results(pdf,X3,Y_out,groupnames):
+def plot_pca_results(pdf,X3,Y_out,groupnames, healthy):
     fig = plt.figure(figsize=(6, 6))
     ax = Axes3D(fig)
     n = np.where(Y_out == 0)
@@ -106,7 +105,7 @@ def plot_pca_results(pdf,X3,Y_out,groupnames):
     plt.close()
 
 
-def plot_clustered_pca(pdf,X3,Y_out,P,k,groupnames):
+def plot_clustered_pca(pdf,X3,Y_out,P,k,groupnames, healthy):
     # visualize in 3D
     fig = plt.figure(figsize=(6,6))
     ax = Axes3D(fig)
@@ -198,7 +197,7 @@ def plot_pie_and_distribution(pdf,part,part_cluster,k):
     pdf.savefig(fig)
     plt.close()
 
-def plot_group_TPM(P, Y_out, k, pdf, groupnames):
+def plot_group_TPM(P, Y_out, k, pdf, groupnames, healthy):
 
     TPM_0 = prop.get_transition_matrix(P[Y_out == 0],k)
     TPM_1 = prop.get_transition_matrix(P[Y_out == 1],k)
@@ -219,7 +218,7 @@ def plot_group_TPM(P, Y_out, k, pdf, groupnames):
     pdf.savefig(f)
     plt.close()
 
-def plot_group_averaged_TPM(AllPart, P, Y_out, k, pdf, data, partnames, groupnames):
+def plot_group_averaged_TPM(AllPart, P, Y_out, k, pdf, data, partnames, groupnames, healthy):
 
     P_0 = np.empty((len(AllPart[partnames[0]]),k,k))
     P_1 = np.empty((len(AllPart[partnames[1]]),k,k))

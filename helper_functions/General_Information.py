@@ -1,30 +1,12 @@
 import pandas as pd
 import numpy as np
 
-#model = 'K-means'
-#model = 'HMM'
-#value= 'Diag'
-#value= 'Prog'
-# number of Clusters/ Phases to explore
-#KS = [6]
-#PC = 5
-
-
-#mode = 'wPLI'
-#mode = 'dPLI'
-
-#healthy ='Yes'
-#healthy ='No'
-
-#step = "01"
-#step = "10"
-
-
 def get_data(mode, frequency, step):
     INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/features/"
 
     # import data
-    data = pd.read_csv(INPUT_DIR+"33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
+    #data = pd.read_csv(INPUT_DIR+"33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
+    data = pd.read_csv("data/33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
     if data.columns[0] != 'Name':
         del data[data.columns[0]]
 
@@ -121,5 +103,5 @@ def load_data(mode, frequency, step, healthy, value):
                             'W03', 'W04', 'W08', 'W22', 'W28', 'W31', 'W34', 'W36']
     CRSR_value=[4, 10, 12, 4, 5, 6, 11, 5, 8, 0, 0, 5, 0, 3, 5, 5, 6, 6, 8, 7, 6, 5, 5, 4]
 
-    return AllPart, data, X, Y_out, CRSR_ID, CRSR_value
+    return AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames
 
