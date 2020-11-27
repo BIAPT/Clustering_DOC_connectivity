@@ -4,3 +4,6 @@ data/33_Part_WholeBrain_wpli_10_1_alpha.pickle
 data/33_Part_wpli_10_01_alpha.csv
 data/features33_Part_wpli_10_01_alpha.csv
 *.csv
+*.pyc
+*.pyc
+*.pdf

@@ -1,7 +1,7 @@
 import matplotlib
 import sys
 sys.path.append('../')
-from helper_functions import stability_measure
+from helper_functions import stability_measure_2
 from matplotlib import pyplot as plt
 import matplotlib.backends.backend_pdf
 import helper_functions.General_Information as general
@@ -31,10 +31,10 @@ Stability Index
 """
 P=[3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
 K=[2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
-Rep=10                              #number of Repetitions (Mean at the end)
+Rep=2                              #number of Repetitions (Mean at the end)
 
-SI_M_rand, SI_SD_rand = stability_measure.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
-SI_M_Base, SI_SD_Base = stability_measure.compute_stability_index(X, Y_ID, P, K, Rep)
+SI_M_rand, SI_SD_rand = stability_measure_2.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
+SI_M_Base, SI_SD_Base = stability_measure_2.compute_stability_index(X, Y_ID, P, K, Rep)
 
 fig,a = plt.subplots(2, 2)
 plt.setp(a, xticks=[0, 1, 2, 3, 4, 5, 6, 7, 8], xticklabels=['2', '3', '4', '5', '6', '7', '8', '9', '10'],
@@ -82,8 +82,8 @@ P=[3, 4, 5, 6, 7, 8, 9, 10]        #number of Principal components to iterate
 K=[2, 3, 4, 5, 6, 7, 8, 9, 10]     #number of K-clusters to iterate
 
 with joblib.parallel_backend('loky'):
-    SIS_Rand = stability_measure.compute_silhouette_score(data_random, P, K)
-    SIS_Base = stability_measure.compute_silhouette_score(X, P, K)
+    SIS_Rand = stability_measure_2.compute_silhouette_score(data_random, P, K)
+    SIS_Base = stability_measure_2.compute_silhouette_score(X, P, K)
 
 fig, a = plt.subplots(1, 2)
 plt.setp(a, xticks=[0,1,2,3,4,5,6,7,8,9] , xticklabels=['2','3','4','5','6','7','8','9','10'],

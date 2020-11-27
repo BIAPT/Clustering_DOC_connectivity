@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=stability_k_parallel
+#SBATCH --job-name=stability_all_parallel
 #SBATCH --account=def-sblain
 #SBATCH --mem=90000      # increase as needed
 #SBATCH --time=0-01:00:00
@@ -18,4 +18,4 @@ pip install --no-index scikit-learn
 pip install --no-index joblib
 pip install --no-index pandas
 pip install --no-index matplotlib
-python -u compute_stability.py
+python -u compute_stability_2.py
