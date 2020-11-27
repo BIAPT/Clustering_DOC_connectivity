@@ -57,6 +57,7 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
 
             for v in values:
                 k_tmp = v[1]
+                print("Rep {} von {} p = {} k = {}".format(r, Rep, p, k_tmp))
                 unequal_percentage=v[0]
                 SI[r, K.index(k_tmp), P.index(p)] = unequal_percentage
 

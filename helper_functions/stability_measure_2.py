@@ -50,6 +50,7 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
         r_tmp = v[1]
         p_tmp = v[2]
         k_tmp = v[3]
+        print("Rep {} von {} p = {} k = {}".format(r_tmp, Rep, p_tmp, k_tmp))
         SI[r_tmp, K.index(k_tmp), P.index(p_tmp)] = unequal_percentage
 
     SI_M = np.mean(SI,axis=0)
