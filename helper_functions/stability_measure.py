@@ -41,8 +41,7 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
             pool = mp.Pool(processes=ncpus)
 
             # Calculate each round asynchronously
-            unequal_percentage, k_tmp = [pool.apply_async(compute_stability,
-                                                          args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
+            unequal_percentage, k_tmp = [pool.apply_async(stability, args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
 
             SI[r, K.index(k_tmp), P.index(p)] = unequal_percentage
 
@@ -53,7 +52,7 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
 
 
 
-def compute_stability(k,X_temp_LD, X_test_LD, r, Rep, p):
+def stability(k,X_temp_LD, X_test_LD, r, Rep, p):
     k_tmp = k
     sys.stdout.flush() #needed for mp
 
