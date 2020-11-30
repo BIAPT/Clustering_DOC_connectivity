@@ -91,11 +91,6 @@ def compute_silhouette_score(X,P,K):
     return SIL
 
 
-
-
-
-
-
 def compute_stability_index(X,Y_ID,P,K,Rep):
 
     SI = np.empty([Rep, len(K), len(P)])   # Collection of stability index over Repetitions

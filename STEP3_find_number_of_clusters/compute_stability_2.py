@@ -30,7 +30,7 @@ Stability Index
 """
 P=[3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
 K=[2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
-Rep=2                              #number of Repetitions (Mean at the end)
+Rep=20                               #number of Repetitions (Mean at the end)
 
 SI_M_rand, SI_SD_rand = stability_measure_2.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
 SI_M_Base, SI_SD_Base = stability_measure_2.compute_stability_index(X, Y_ID, P, K, Rep)
