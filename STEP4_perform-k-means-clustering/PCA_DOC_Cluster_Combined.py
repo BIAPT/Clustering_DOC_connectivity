@@ -15,14 +15,14 @@ import scipy
 import numpy as np
 import pandas as pd
 
-#mode = 'wPLI'
-mode = 'dPLI'
+mode = 'wPLI'
+#mode = 'dPLI'
 
 healthy ='Yes'
 #healthy ='No'
 
-step = "01"
-#step = "10"
+#step = "01"
+step = "10"
 
 frequency = 'alpha'
 #frequency = 'theta'
@@ -35,15 +35,15 @@ model = 'K-means'
 value= 'Prog'
 
 # number of Clusters/ Phases to explore
-KS = [6]
+KS = [5,6,7]
 PC = 5
 
 AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames = general.load_data(mode,
                                                                                         frequency, step, healthy, value)
 
 
-pdf = matplotlib.backends.backend_pdf.PdfPages("../{}_{}_{}_{}_{}_{}.pdf"
-                                               .format(frequency, mode, model, healthy, step, value))
+pdf = matplotlib.backends.backend_pdf.PdfPages("../{}_{}_{}_P{}_{}_{}_{}.pdf"
+                                               .format(frequency, mode, model,str(PC), healthy, step, value))
 
 """
     PCA - all_participants
