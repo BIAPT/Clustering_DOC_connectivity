@@ -3,23 +3,15 @@ This Script provides the methods is to
 calculate the stability index of a K-Means
 Clustering Solution (propoosed by Lange et al 2004)
 '''
-import numpy as np
-
 # General Import
-import os
-import sys
-
+import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-from scipy.spatial import distance
 from sklearn.metrics import silhouette_score
-import random
-import joblib
 from numpy import unravel_index
 import multiprocessing as mp
 import os
 import sys
-import joblib
 
 def compute_stability_index(X,Y_ID,P,K,Rep):
 
@@ -34,6 +26,7 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
     # initialize parallelization
     ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=10))
     pool = mp.Pool(processes=ncpus)
+
     result = [pool.apply_async(stability, args=(X, Y_ID, param)) for param in params]
 
     # Calculate each round asynchronously
@@ -61,7 +54,7 @@ def stability (X, Y_ID, param):
     p=param[1]
     k=param[2]
 
-    sys.stdout.flush() #needed for mp
+    sys.stdout.flush()  # This is needed when we use multiprocessing
 
     x_complete = X.copy()  # complete input set for PCA-fit
     # divide the participants into two groups temp and test

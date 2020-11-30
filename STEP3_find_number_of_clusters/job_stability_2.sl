@@ -18,4 +18,5 @@ pip install --no-index scikit-learn
 pip install --no-index joblib
 pip install --no-index pandas
 pip install --no-index matplotlib
+pip install --no-index multiprocessing
 python -u compute_stability_2.py
