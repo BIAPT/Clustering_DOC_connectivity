@@ -12,7 +12,7 @@ import helper_functions.process_properties as prop
 def plot_connectivity(X_conn, mode):
     regions = ['LF','LC','LP','LO','LT','RF','RC','RP','RO','RT']
     conn_matrix = np.zeros((len(regions), len(regions)))
-    coords = np.loadtxt('helper_functions/coordinates.txt')
+    coords = np.loadtxt('../helper_functions/coordinates.txt')
 
     for t in range(len(X_conn)):
         tmp = X_conn

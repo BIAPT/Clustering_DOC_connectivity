@@ -12,7 +12,7 @@ import pandas as pd
 mode = 'wpli'
 frequency='alpha'
 healthy = 'Yes'
-value = 'Diag'
+value = 'Prog'
 step = '01'
 
 OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/stability/"
@@ -31,7 +31,7 @@ Stability Index
 """
 P = [3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
 K = [2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
-Rep = 2                              #number of Repetitions (Mean at the end)
+Rep = 20                              #number of Repetitions (Mean at the end)
 
 SI_M_rand, SI_SD_rand = stability_measure.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
 SI_M_Base, SI_SD_Base = stability_measure.compute_stability_index(X, Y_ID, P, K, Rep)
@@ -70,9 +70,10 @@ plt.show()
 
 pdf.savefig(fig)
 
-pd.DataFrame(SI_M_Base).to_pickle(OUTPUT_DIR + "SI_MEAN_healthy_{}_{}_10_{}_{}.pdf".format(healthy, mode, step, frequency))
-
-pd.DataFrame(SI_SD_Base).to_pickle(OUTPUT_DIR + "SI_SD_healthy_{}_{}_10_{}_{}.pdf".format(healthy, mode, step, frequency))
+pd.DataFrame(SI_M_Base).to_pickle(OUTPUT_DIR + "SI_MEAN_healthy_{}_{}_10_{}_{}.pickle".format(healthy, mode, step, frequency))
+pd.DataFrame(SI_SD_Base).to_pickle(OUTPUT_DIR + "SI_SD_healthy_{}_{}_10_{}_{}.pickle".format(healthy, mode, step, frequency))
+pd.DataFrame(SI_M_Base).to_csv(OUTPUT_DIR + "SI_MEAN_healthy_{}_{}_10_{}_{}.csv".format(healthy, mode, step, frequency))
+pd.DataFrame(SI_SD_Base).to_csv(OUTPUT_DIR + "SI_SD_healthy_{}_{}_10_{}_{}.csv".format(healthy, mode, step, frequency))
 
 
 """
@@ -81,9 +82,8 @@ Silhouette Score
 P=[3, 4, 5, 6, 7, 8, 9, 10]        #number of Principal components to iterate
 K=[2, 3, 4, 5, 6, 7, 8, 9, 10]     #number of K-clusters to iterate
 
-with joblib.parallel_backend('loky'):
-    SIS_Rand = stability_measure.compute_silhouette_score(data_random, P, K)
-    SIS_Base = stability_measure.compute_silhouette_score(X, P, K)
+SIS_Rand = stability_measure.compute_silhouette_score(data_random, P, K)
+SIS_Base = stability_measure.compute_silhouette_score(X, P, K)
 
 fig, a = plt.subplots(1, 2)
 plt.setp(a, xticks=[0,1,2,3,4,5,6,7,8,9] , xticklabels=['2','3','4','5','6','7','8','9','10'],
@@ -109,5 +109,4 @@ pdf.close()
 
 
 pd.DataFrame(SIS_Base).to_csv(OUTPUT_DIR+"SI_SIS_healthy_{}_{}_10_{}_{}.csv".format(healthy, mode, step, frequency))
-
-#pd.DataFrame(SIS_Rand).to_pickle('SIS_rand_33part_wPLI_30_10_allfr.pickle')
+pd.DataFrame(SIS_Base).to_pickle(OUTPUT_DIR+"SI_SIS_healthy_{}_{}_10_{}_{}.pickle".format(healthy, mode, step, frequency))
