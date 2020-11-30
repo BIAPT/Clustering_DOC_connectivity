@@ -24,10 +24,10 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
                 params.append([r,p,k])
 
     # initialize parallelization
-    ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=10))
+    ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=1))
     pool = mp.Pool(processes=ncpus)
 
-    result = [pool.apply_async(stability, args=(X, Y_ID, param)) for param in params]
+    result = [pool.apply_async(stability, args=(X, Y_ID, param,)) for param in params]
 
     # Calculate each round asynchronously
     #result = [pool.apply_async(stability, args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
