@@ -5,8 +5,8 @@ def get_data(mode, frequency, step):
     INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/features/"
 
     # import data
-    #data = pd.read_csv(INPUT_DIR+"33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
-    data = pd.read_csv("../data/33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
+    data = pd.read_csv(INPUT_DIR+"33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
+    #data = pd.read_csv("../data/33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
     if data.columns[0] != 'Name':
         del data[data.columns[0]]
 
