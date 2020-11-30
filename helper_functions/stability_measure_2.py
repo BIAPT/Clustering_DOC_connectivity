@@ -13,49 +13,12 @@ import multiprocessing as mp
 import os
 import sys
 
-def compute_stability_index(X,Y_ID,P,K,Rep):
-
-    SI = np.empty([Rep, len(K), len(P)])   # Collection of stability index over Repetitions
-
-    params=[]
-    for r in range(Rep):
-        for p in P:
-            for k in K:
-                params.append([r,p,k])
-
-    # initialize parallelization
-    ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=1))
-    pool = mp.Pool(processes=ncpus)
-
-    result = [pool.apply_async(stability, args=(X, Y_ID, param,)) for param in params]
-
-    # Calculate each round asynchronously
-    #result = [pool.apply_async(stability, args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
-    #unequal_percentage, k_tmp = [pool.apply_async(stability, args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
-    values = [p.get() for p in result]
-
-    for v in values:
-        unequal_percentage = v[0]
-        r_tmp = v[1]
-        p_tmp = v[2]
-        k_tmp = v[3]
-        print("Rep {} von {} p = {} k = {}".format(r_tmp, Rep, p_tmp, k_tmp))
-        SI[r_tmp, K.index(k_tmp), P.index(p_tmp)] = unequal_percentage
-
-    SI_M = np.mean(SI,axis=0)
-    SI_SD = np.std(SI,axis=0)
-
-    return SI_M, SI_SD
-
-
-
-def stability (X, Y_ID, param):
+def stability (X, Y_ID, param, ):
     r=param[0]
     p=param[1]
     k=param[2]
-
+    print("K-means run: r = {}, p = {}, k = {}".format(r, p, k))
     sys.stdout.flush()  # This is needed when we use multiprocessing
-
     x_complete = X.copy()  # complete input set for PCA-fit
     # divide the participants into two groups temp and test
     part = np.unique(Y_ID)
@@ -127,6 +90,45 @@ def compute_silhouette_score(X,P,K):
 
     return SIL
 
+
+
+
+
+
+
+def compute_stability_index(X,Y_ID,P,K,Rep):
+
+    SI = np.empty([Rep, len(K), len(P)])   # Collection of stability index over Repetitions
+
+    params=[]
+    for r in range(Rep):
+        for p in P:
+            for k in K:
+                params.append([r,p,k])
+
+    # initialize parallelization
+    ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=1))
+    pool = mp.Pool(processes=ncpus)
+
+    result = [pool.apply_async(stability, args=(X, Y_ID, param,)) for param in params]
+
+    # Calculate each round asynchronously
+    #result = [pool.apply_async(stability, args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
+    #unequal_percentage, k_tmp = [pool.apply_async(stability, args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
+    values = [p.get() for p in result]
+
+    for v in values:
+        unequal_percentage = v[0]
+        r_tmp = v[1]
+        p_tmp = v[2]
+        k_tmp = v[3]
+        print("Rep {} von {} p = {} k = {}".format(r_tmp, Rep, p_tmp, k_tmp))
+        SI[r_tmp, K.index(k_tmp), P.index(p_tmp)] = unequal_percentage
+
+    SI_M = np.mean(SI,axis=0)
+    SI_SD = np.std(SI,axis=0)
+
+    return SI_M, SI_SD
 
 
 
