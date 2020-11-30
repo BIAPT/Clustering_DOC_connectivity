@@ -8,7 +8,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-mode = 'wpli'
+mode = 'dpli'
 frequency='alpha'
 healthy = 'Yes'
 value = 'Diag'
