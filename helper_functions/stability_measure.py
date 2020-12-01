@@ -74,7 +74,8 @@ def stability (X, Y_ID, param, ):
     print("END: r = {}, p = {}, k = {}".format(r, p, k))
     sys.stdout.flush()  # This is needed when we use multiprocessing
 
-    return unequal, r, p, k
+    #return unequal, r, p, k
+    return unequal
 
 
 def compute_silhouette_score(X,P,K):
