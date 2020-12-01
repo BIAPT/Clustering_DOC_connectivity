@@ -32,7 +32,7 @@ To reproduce the analysis or use the code with other data, follow the steps belo
 
   - almost all files were set up to be run on compute Canada. All steps can be run on a private computer in theory without complication, but will take a considerable amount of time (especially step0). 
 
-## Step 0: Calculate time-resolved functional Connectivity
+## Step 1: Calculate time-resolved functional Connectivity
 
 This step will calculate the time-resolved functional connectivity with a step size of 10 and 1 and a window size of 10. The functional connectivity measures are wPLI and dPLI. This is the only part of the analysis run in matlab. You have two ways of running the analysis:  
 
@@ -45,26 +45,31 @@ This step will calculate the time-resolved functional connectivity with a step s
 - Once ready you can run the following commands: `sbatch  dPLI_claculation.sl`, this will send the job to your cluster
 - Repeat the same procedure for `generate_wpli_graphs`. You do not have to wait for the dPLI graph to be done before you start running the wPLI computation.
 
-#### way 2: (more time to set up but much faster) 
+#### way 2: (more time to set up but much faster to run) 
 
 - follow the instructions on "Using the MATLAB Parallel Server" https://docs.computecanada.ca/wiki/MATLAB to set up Metlab 2020a (other versions are not supported) 
 - open  `dPLI_for_time_resolved.m` on your private Matlab environment but adapt the paths for the remote directory.  
 - adapt also the `ccSBATCH.m `  to correspond to your file directory
 - run the commands `cluster = parcluster('beluga')` in your local python environment. After this, run `ccSBATCH.submitTo(cluster)`
 - If everything is set up right, your local Matlab environment will ask you for the password and the jobs will be submitted to the cluster and run on several nodes in parallel. 
-
-
+- repeat the same steps for wPLI
 
 **Word of Caution:** The speed up that you can gain from the parallelization really depends on what is the availability of the cluster. If you try to use up to 960 cores you might wait a long time before it becomes available (I've waited 8+h and still wasn't scheduled). However, if you use only 40 cores on 1 node you will most likely get scheduled right away. There is a balance to strike and it is still not obvious what is the best course of action. Sometime you get lucky sometime you don't.
 
---> After this step you should have all graphs needed for further calculation in the results/graphs folder
 
-## Step 1: Generate the Feature Dataframe
-- Navigate into the folder `step_1_generate_features`. Once there open the job.sl and modify the parameters to match the resource you want to use and your account on compute Canada. 
-- Open the file `generate_features.m` and modify the input/output folder to match what you have in step 1. You can also change the parameter of the analysis if needs be.
-- Once ready you can run the following commands: `sbatch job.sl` assuming the cluster variable is already assigned as show in step 1.
+
+## Step 2: Generate the Feature Dataframe
+- create a features folder in your results folder on Compute Canada
+- Navigate into the folder `STEP2_load-and-store-fc-data`. Once there open the `extract_features.sl` and modify the parameters to match the resource you want to use and your account on compute Canada. 
+- Once ready you can run the following commands: `sbatch extract_features.sl` assuming the cluster variable is already assigned as show in step 1.
+- this will output your time resolved functional connectivity matrices for all your conditions in the features folder (as pickle and csv)
+
+
+
+## TODO 
 
 ## Step 2: Run the model selection with LOSO cross validation
+
 - Open the commons.py file and make sure that the input and output are correct for your HPC setup and define which epoch, graph and feature category you want to select
 
 - crate a folder called  "models" in the "results" folder

@@ -8,7 +8,7 @@
 MODES=("dpli")
 FREQUENCIES=("alpha")
 HEALTHY=("Yes")
-STEPS=("01")
+STEPS=("10")
 
 for mode in ${MODES[@]}; do
     for frequency in ${FREQUENCIES[@]}; do

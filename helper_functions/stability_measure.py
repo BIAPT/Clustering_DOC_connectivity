@@ -37,11 +37,11 @@ def stability (X, Y_ID, param, ):
     print("PCA FINISHED: r = {}, p = {}, k = {}".format(r, p, k))
     sys.stdout.flush()  # This is needed when we use multiprocessing
 
-    kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=1000)
+    kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=100)
     kmeans.fit(X_temp_LD)  # fit the classifier on X_template
     S_temp = kmeans.predict(X_test_LD)
 
-    kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=1000)
+    kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=100)
     kmeans.fit(X_test_LD)  # fit the classifier on X_test
     S_test = kmeans.predict(X_test_LD)
     print("K-MEANS FINISHED: r = {}, p = {}, k = {}".format(r, p, k))
