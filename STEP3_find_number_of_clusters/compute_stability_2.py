@@ -30,7 +30,7 @@ Stability Index
 """
 P=[3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
 K=[2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
-Rep=20                               #number of Repetitions (Mean at the end)
+Rep=1                                #number of Repetitions (Mean at the end)
 
 SI_M_rand, SI_SD_rand = stability_measure_2.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
 SI_M_Base, SI_SD_Base = stability_measure_2.compute_stability_index(X, Y_ID, P, K, Rep)
@@ -73,6 +73,7 @@ pd.DataFrame(SI_M_Base).to_pickle(OUTPUT_DIR + "SI_MEAN_healthy_{}_{}_10_{}_{}.p
 
 pd.DataFrame(SI_SD_Base).to_pickle(OUTPUT_DIR + "SI_SD_healthy_{}_{}_10_{}_{}.pdf".format(healthy, mode, step, frequency))
 
+print('Stability index finished')
 
 """
 Silhouette Score
@@ -100,13 +101,19 @@ a[1].set_xlabel("")
 #im.set_clim(0.1,0.45)
 plt.colorbar(im,ax=a[1])
 
+print('Silhouette score finished')
+
 fig.set_figheight(3)
 fig.set_figwidth(10)
 plt.show()
 pdf.savefig(fig)
 pdf.close()
 
+print('PDF Closed')
+
 
 pd.DataFrame(SIS_Base).to_csv(OUTPUT_DIR+"SI_SIS_healthy_{}_{}_10_{}_{}.csv".format(healthy, mode, step, frequency))
+
+print('THE END')
 
 #pd.DataFrame(SIS_Rand).to_pickle('SIS_rand_33part_wPLI_30_10_allfr.pickle')

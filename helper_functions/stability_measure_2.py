@@ -107,6 +107,8 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
 
     result = [pool.apply_async(stability, args=(X, Y_ID, param,)) for param in params]
 
+    print('Parallel Stability index finished ... data extraction')
+
     # Calculate each round asynchronously
     #result = [pool.apply_async(stability, args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
     #unequal_percentage, k_tmp = [pool.apply_async(stability, args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
@@ -122,7 +124,6 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
 
     SI_M = np.mean(SI,axis=0)
     SI_SD = np.std(SI,axis=0)
-
     return SI_M, SI_SD
 
 
