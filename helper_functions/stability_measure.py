@@ -105,21 +105,18 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
     ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=1))
     pool = mp.Pool(processes=ncpus)
 
-    result = [pool.apply_async(stability, args=(X, Y_ID, param,)) for param in params]
-
+    # Calculate each round asynchronously
+    results = [pool.apply_async(stability, args=(X, Y_ID, param,)) for param in params]
     print('Parallel Stability index finished ... data extraction')
 
-    # Calculate each round asynchronously
-    #result = [pool.apply_async(stability, args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
-    #unequal_percentage, k_tmp = [pool.apply_async(stability, args=(k, X_temp_LD, X_test_LD, r, Rep, p)) for k in K]
-    values = [p.get() for p in result]
+    values = [p.get() for p in results]
 
     for v in values:
         unequal_percentage = v[0]
         r_tmp = v[1]
         p_tmp = v[2]
         k_tmp = v[3]
-        print("Rep {} von {} p = {} k = {}".format(r_tmp, Rep, p_tmp, k_tmp))
+        print("Extracted {} von {} p = {} k = {}".format(r_tmp, Rep, p_tmp, k_tmp))
         SI[r_tmp, K.index(k_tmp), P.index(p_tmp)] = unequal_percentage
 
     SI_M = np.mean(SI,axis=0)

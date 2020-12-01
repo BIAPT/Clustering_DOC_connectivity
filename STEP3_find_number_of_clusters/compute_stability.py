@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../')
-from helper_functions import stability_measure_2
+from helper_functions import stability_measure
 from matplotlib import pyplot as plt
 import matplotlib.backends.backend_pdf
 import helper_functions.General_Information as general
@@ -8,11 +8,15 @@ import joblib
 import numpy as np
 import pandas as pd
 
-mode = 'dpli'
-frequency='alpha'
-healthy = 'Yes'
+# This will be given by the srun in the bash file
+# Get the argument
+analysis_param = sys.argv[1]
+
+# Parse the parameters
+(mode, frequency, healthy, step) = analysis_param.split("_")
+
+# this parameter won't change anything is this part of the analysis
 value = 'Diag'
-step = '01'
 
 OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/stability/"
 
@@ -28,12 +32,15 @@ Y_ID = data['ID']
 """
 Stability Index
 """
-P=[3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
-K=[2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
+#P=[3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
+#K=[2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
+
+P=[3, 4]          #number of Principal components to iterate
+K=[2, 3]       #number of K-clusters to iterate
 Rep=1                                #number of Repetitions (Mean at the end)
 
-SI_M_rand, SI_SD_rand = stability_measure_2.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
-SI_M_Base, SI_SD_Base = stability_measure_2.compute_stability_index(X, Y_ID, P, K, Rep)
+SI_M_rand, SI_SD_rand = stability_measure.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
+SI_M_Base, SI_SD_Base = stability_measure.compute_stability_index(X, Y_ID, P, K, Rep)
 
 fig,a = plt.subplots(2, 2)
 plt.setp(a, xticks=[0, 1, 2, 3, 4, 5, 6, 7, 8], xticklabels=['2', '3', '4', '5', '6', '7', '8', '9', '10'],
@@ -82,8 +89,8 @@ P=[3, 4, 5, 6, 7, 8, 9, 10]        #number of Principal components to iterate
 K=[2, 3, 4, 5, 6, 7, 8, 9, 10]     #number of K-clusters to iterate
 
 with joblib.parallel_backend('loky'):
-    SIS_Rand = stability_measure_2.compute_silhouette_score(data_random, P, K)
-    SIS_Base = stability_measure_2.compute_silhouette_score(X, P, K)
+    SIS_Rand = stability_measure.compute_silhouette_score(data_random, P, K)
+    SIS_Base = stability_measure.compute_silhouette_score(X, P, K)
 
 fig, a = plt.subplots(1, 2)
 plt.setp(a, xticks=[0,1,2,3,4,5,6,7,8,9] , xticklabels=['2','3','4','5','6','7','8','9','10'],
