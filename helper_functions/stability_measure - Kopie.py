@@ -13,7 +13,30 @@ import multiprocessing as mp
 import os
 import sys
 
-def stability (X_temp_LD, X_test_LD,k):
+def stability (X, Y_ID, param):
+    r=param[0]
+    p=param[1]
+    k=param[2]
+    print("Start: r = {}, p = {}, k = {}".format(r, p, k))
+    sys.stdout.flush()  # This is needed when we use multiprocessing
+    x_complete = X.copy()  # complete input set for PCA-fit
+    # divide the participants into two groups temp and test
+    part = np.unique(Y_ID)
+    nr_part = len(part)
+    rand_temp = np.random.choice(part, nr_part // 2, replace=False)
+    rand_test = np.setdiff1d(part, rand_temp)
+
+    X_temp = X[np.isin(Y_ID, rand_temp)]
+    X_test = X[np.isin(Y_ID, rand_test)]
+
+    # fit the pca on the complete dataset and transfor the divided sets
+    pca = PCA(n_components=p)
+    pca.fit(x_complete)
+    X_temp_LD = pca.transform(X_temp)  # get a low dimension version of X_temp
+    X_test_LD = pca.transform(X_test)  # and X_test
+    print("PCA FINISHED: r = {}, p = {}, k = {}".format(r, p, k))
+    sys.stdout.flush()  # This is needed when we use multiprocessing
+
     kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=100)
     kmeans.fit(X_temp_LD.copy())  # fit the classifier on X_template
     S_temp = kmeans.predict(X_test_LD.copy())
@@ -21,7 +44,7 @@ def stability (X_temp_LD, X_test_LD,k):
     kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=100)
     kmeans.fit(X_test_LD.copy())  # fit the classifier on X_test
     S_test = kmeans.predict(X_test_LD.copy())
-    print("K-MEANS FINISHED: k = {}".format(k))
+    print("K-MEANS FINISHED: r = {}, p = {}, k = {}".format(r, p, k))
     sys.stdout.flush()  # This is needed when we use multiprocessing
 
     # now we would need to define which clusters correspond to each other
@@ -48,7 +71,7 @@ def stability (X_temp_LD, X_test_LD,k):
     # compute the hamming distance between the 2 solutions
     # equal to the percantage amount of unequal digits.
     unequal = 1 - common_val / S_test.shape[0]
-    print("END: k = {}".format(k))
+    print("END: r = {}, p = {}, k = {}".format(r, p, k))
     sys.stdout.flush()  # This is needed when we use multiprocessing
     # #return unequal, r, p, k
     return unequal
@@ -74,46 +97,37 @@ def compute_silhouette_score(X,P,K):
 
 
 def compute_stability_index(X,Y_ID,P,K,Rep):
-    # for all repetitions
-    SI = np.empty([Rep, len(K), len(P)])  # Collection of stability index over Repetitions
+
+    params=[]
     for r in range(Rep):
-        # for all PCs
         for p in P:
-            print("Start: r = {}, p = {}".format(r, p))
-            x_complete = X.copy()  # complete input set for PCA-fit
-            # divide the participants into two groups temp and test
-            part = np.unique(Y_ID)
-            nr_part = len(part)
-            rand_temp = np.random.choice(part, nr_part // 2, replace=False)
-            rand_test = np.setdiff1d(part, rand_temp)
+            for k in K:
+                params.append([r,p,k])
 
-            X_temp = X[np.isin(Y_ID, rand_temp)]
-            X_test = X[np.isin(Y_ID, rand_test)]
+    # initialize parallelization
+    ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=1))
+    pool = mp.Pool(processes=ncpus)
 
-            # fit the pca on the complete dataset and transfor the divided sets
-            pca = PCA(n_components=p)
-            pca.fit(x_complete)
-            X_temp_LD = pca.transform(X_temp)  # get a low dimension version of X_temp
-            X_test_LD = pca.transform(X_test)  # and X_test
-            print("PCA FINISHED: r = {}, p = {}".format(r, p))
+    # Calculate each round asynchronously
+    results = [pool.apply_async(stability, args=(X, Y_ID, param,)) for param in params]
+    values = [p.get() for p in results]
+    print('Parallel Stability index finished')
+    sys.stdout.flush()  # This is needed when we use multiprocessing
+    return values
 
-            # initialize parallelization to loop over K
-            ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=1))
-            pool = mp.Pool(processes=ncpus)
+def order_stability_index(values, Rep, K, P):
+    SI = np.empty([Rep, len(K), len(P)])   # Collection of stability index over Repetitions
 
-            # Calculate each round asynchronously
-            results = [pool.apply_async(stability, args=(X_temp_LD, X_test_LD,k, )) for k in K]
-            values = [p.get() for p in results]
-            print(values)
-            print('Parallel Stability index finished')
+    for v in values:
+        unequal_percentage = v[0]
+        r_tmp = v[1]
+        p_tmp = v[2]
+        k_tmp = v[3]
+        print("Extracted {} von {} p = {} k = {}".format(r_tmp, Rep, p_tmp, k_tmp))
+        SI[r_tmp, K.index(k_tmp), P.index(p_tmp)] = unequal_percentage
 
-            #for i, v in enumerate(values):
-            #    unequal_percentage = v[0]
-            #    print("Extracted {} von {} p = {} k = {}".format(r, Rep, p, K[i]))
-            #    SI[r, K.index(i), P.index(p)] = unequal_percentage
-
-            SI_M = np.mean(SI, axis=0)
-            SI_SD = np.std(SI, axis=0)
+    SI_M = np.mean(SI, axis=0)
+    SI_SD = np.std(SI, axis=0)
     return SI_M, SI_SD
 
 
