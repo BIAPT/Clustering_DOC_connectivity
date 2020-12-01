@@ -17,4 +17,4 @@ pip install --no-index --upgrade pip
 pip install --no-index scikit-learn
 pip install --no-index pandas
 pip install --no-index matplotlib
-python -u compute_stability.py
+python -u STEP3_find_number_of_clusters/compute_stability.py
