@@ -44,8 +44,13 @@ P=[3, 4]          #number of Principal components to iterate
 K=[2, 3]       #number of K-clusters to iterate
 Rep=1                                #number of Repetitions (Mean at the end)
 
-SI_M_rand, SI_SD_rand = stability_measure.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
-SI_M_Base, SI_SD_Base = stability_measure.compute_stability_index(X, Y_ID, P, K, Rep)
+values = stability_measure.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
+print('Data returned')
+SI_M_rand, SI_SD_rand = stability_measure.order_stability_index(values,Rep,K,P)
+print('Data ordered')
+
+values = stability_measure.compute_stability_index(X, Y_ID, P, K, Rep)
+SI_M_Base, SI_SD_Base = stability_measure.order_stability_index(values,Rep,K,P)
 
 fig,a = plt.subplots(2, 2)
 plt.setp(a, xticks=[0, 1, 2, 3, 4, 5, 6, 7, 8], xticklabels=['2', '3', '4', '5', '6', '7', '8', '9', '10'],

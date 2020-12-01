@@ -1,6 +1,6 @@
 # Altered dynamic FC in DOC
 about the project: 
-Altered dynamic properties of functional connectivity in patients in a Disorder of Consciousness 
+### Altered dynamic properties of functional connectivity in patients in a Disorder of Consciousness 
 This project aims to identify diagnostic and prognostic value of time-resolved functional connectivity. 
 
 To reproduce the analysis or use the code with other data, follow the steps below
@@ -15,6 +15,8 @@ To reproduce the analysis or use the code with other data, follow the steps belo
 - clone this code, as well as Neuroalgo toolbox in your Compute Canada account (also in the BIAPT github)
 
 - upload all data as .mat files inside your folder "data" using [Globus](https://globus.computecanada.ca/) or scp
+
+- Make sure you have Matlab 2020a with the parallel toolbox intalled on your machine. 
 
   ## Notes:
 
@@ -32,15 +34,26 @@ To reproduce the analysis or use the code with other data, follow the steps belo
 
 ## Step 0: Calculate time-resolved functional Connectivity
 
-This step will calculate the time-resolved functional connectivity with a step size of 10 and 1 and a window size of 10. The functional connectivity measures are wPLI and dPLI. 
+This step will calculate the time-resolved functional connectivity with a step size of 10 and 1 and a window size of 10. The functional connectivity measures are wPLI and dPLI. This is the only part of the analysis run in matlab. You have two ways of running the analysis:  
 
-- navigate to the results folder and create 2 subdirectories called "wPLI" and "dPLI" inside each of them create the subfolders "step10" and "step01" 
-- 
--  `step_0_generate_graphs/`.
-- Move to the `generate_aec_graphs` subfolder. Open the job.sl and modify the parameters to match the resource you want to use and your account on Compute Canada.
-- Open the `generate_aec.m` file and modify the parameter relating to your cluster setup and path. There are some path that needs to be modified in order for the input/output to make sense in your section of the cluster. 
-- Once ready you can run the following commands: `sbatch job.sl`, this will send the job to your cluster
-- Repeat the same procedure for `generate_wpli_graphs`. You do not have to wait for the AEC graph to be done before you start running the wPLI computation. Both code use the same EEG source localized data as input, but they do not step on each other while calculating the graphs.
+#### way1:  
+
+- navigate to the results folder and create 2 subdirectories called "wPLI" and "dPLI" inside each of them create the subfolders "step10" and "step01"  (or others depending on your analysis parameters)
+-  navigate to`step_0_generate_graphs/`.
+- Move to`STEP1_calculate-time-resolved-functional-connectivity ` Choose wPLI, open the `dPLI_claculation.sl` and modify the parameters to match the resource you want to use and your account on Compute Canada.
+- Open the `dPLI_for_time_resolved.m` file and modify the parameter relating to your cluster setup and path. There are some path that needs to be modified in order for the input/output to make sense in your section of the cluster. 
+- Once ready you can run the following commands: `sbatch  dPLI_claculation.sl`, this will send the job to your cluster
+- Repeat the same procedure for `generate_wpli_graphs`. You do not have to wait for the dPLI graph to be done before you start running the wPLI computation.
+
+#### way 2: (more time to set up but much faster) 
+
+- follow the instructions on "Using the MATLAB Parallel Server" https://docs.computecanada.ca/wiki/MATLAB to set up Metlab 2020a (other versions are not supported) 
+- open  `dPLI_for_time_resolved.m` on your private Matlab environment but adapt the paths for the remote directory.  
+- adapt also the `ccSBATCH.m `  to correspond to your file directory
+- run the commands `cluster = parcluster('beluga')` in your local python environment. After this, run `ccSBATCH.submitTo(cluster)`
+- If everything is set up right, your local Matlab environment will ask you for the password and the jobs will be submitted to the cluster and run on several nodes in parallel. 
+
+
 
 **Word of Caution:** The speed up that you can gain from the parallelization really depends on what is the availability of the cluster. If you try to use up to 960 cores you might wait a long time before it becomes available (I've waited 8+h and still wasn't scheduled). However, if you use only 40 cores on 1 node you will most likely get scheduled right away. There is a balance to strike and it is still not obvious what is the best course of action. Sometime you get lucky sometime you don't.
 

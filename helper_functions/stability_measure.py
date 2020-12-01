@@ -93,8 +93,6 @@ def compute_silhouette_score(X,P,K):
 
 def compute_stability_index(X,Y_ID,P,K,Rep):
 
-    SI = np.empty([Rep, len(K), len(P)])   # Collection of stability index over Repetitions
-
     params=[]
     for r in range(Rep):
         for p in P:
@@ -107,9 +105,13 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
 
     # Calculate each round asynchronously
     results = [pool.apply_async(stability, args=(X, Y_ID, param,)) for param in params]
-    print('Parallel Stability index finished ... data extraction')
-
     values = [p.get() for p in results]
+    print('Parallel Stability index finishe')
+
+    return values
+
+def order_stability_index(values, Rep, K, P):
+    SI = np.empty([Rep, len(K), len(P)])   # Collection of stability index over Repetitions
 
     for v in values:
         unequal_percentage = v[0]
@@ -119,8 +121,8 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
         print("Extracted {} von {} p = {} k = {}".format(r_tmp, Rep, p_tmp, k_tmp))
         SI[r_tmp, K.index(k_tmp), P.index(p_tmp)] = unequal_percentage
 
-    SI_M = np.mean(SI,axis=0)
-    SI_SD = np.std(SI,axis=0)
+    SI_M = np.mean(SI, axis=0)
+    SI_SD = np.std(SI, axis=0)
     return SI_M, SI_SD
 
 
