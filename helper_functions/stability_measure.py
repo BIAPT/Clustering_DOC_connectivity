@@ -14,8 +14,8 @@ import os
 import sys
 
 def stability (X_temp_LD, X_test_LD,k):
+    #sys.stdout.flush()  # This is needed when we use multiprocessing
     print("K-MEANS STARTED: k = {}".format(k))
-    sys.stdout.flush()  # This is needed when we use multiprocessing
     kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=100)
     kmeans.fit(X_temp_LD.copy())  # fit the classifier on X_template
     S_temp = kmeans.predict(X_test_LD.copy())
@@ -104,7 +104,7 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
             pool = mp.Pool(processes=ncpus)
 
             # Calculate each round asynchronously
-            results = [pool.apply_async(stability, args=(X_temp_LD, X_test_LD,k, )) for k in K]
+            results = [pool.apply_async(stability, args=(X_temp_LD, X_test_LD,k,)) for k in K]
             values = [p.get() for p in results]
             print(values)
             print('Parallel Stability index finished')
