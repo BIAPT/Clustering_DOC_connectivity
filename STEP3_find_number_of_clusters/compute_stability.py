@@ -2,7 +2,6 @@ import sys
 sys.path.append('../')
 from matplotlib import pyplot as plt
 import matplotlib.backends.backend_pdf
-import helper_functions.General_Information as general
 import joblib
 import numpy as np
 import pandas as pd
@@ -12,6 +11,7 @@ scriptpath = "."
 sys.path.append(os.path.abspath(scriptpath))
 
 from helper_functions import stability_measure
+import helper_functions.General_Information as general
 
 # This will be given by the srun in the bash file
 # Get the argument
