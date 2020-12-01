@@ -17,7 +17,7 @@ def stability (X, Y_ID, param, ):
     r=param[0]
     p=param[1]
     k=param[2]
-    print("K-means run: r = {}, p = {}, k = {}".format(r, p, k))
+    print("Start: r = {}, p = {}, k = {}".format(r, p, k))
     sys.stdout.flush()  # This is needed when we use multiprocessing
     x_complete = X.copy()  # complete input set for PCA-fit
     # divide the participants into two groups temp and test
@@ -34,6 +34,8 @@ def stability (X, Y_ID, param, ):
     pca.fit(x_complete)
     X_temp_LD = pca.transform(X_temp)  # get a low dimension version of X_temp
     X_test_LD = pca.transform(X_test)  # and X_test
+    print("PCA FINISHED: r = {}, p = {}, k = {}".format(r, p, k))
+    sys.stdout.flush()  # This is needed when we use multiprocessing
 
     kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=1000)
     kmeans.fit(X_temp_LD)  # fit the classifier on X_template
@@ -42,8 +44,8 @@ def stability (X, Y_ID, param, ):
     kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=1000)
     kmeans.fit(X_test_LD)  # fit the classifier on X_test
     S_test = kmeans.predict(X_test_LD)
-
-    #print('Repetition {} with P = {} and k = {}'.format(r + 1, p, k))
+    print("K-MEANS FINISHED: r = {}, p = {}, k = {}".format(r, p, k))
+    sys.stdout.flush()  # This is needed when we use multiprocessing
 
     # now we would need to define which clusters correspond to each other
     # IMPORTANT: The label alone can not be used in this case
@@ -69,6 +71,9 @@ def stability (X, Y_ID, param, ):
     # compute the hamming distance between the 2 solutions
     # equal to the percantage amount of unequal digits.
     unequal = 1 - common_val / S_test.shape[0]
+    print("END: r = {}, p = {}, k = {}".format(r, p, k))
+    sys.stdout.flush()  # This is needed when we use multiprocessing
+
     return unequal, r, p, k
 
 
@@ -106,8 +111,8 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
     # Calculate each round asynchronously
     results = [pool.apply_async(stability, args=(X, Y_ID, param,)) for param in params]
     values = [p.get() for p in results]
-    print('Parallel Stability index finishe')
-
+    print('Parallel Stability index finished')
+    sys.stdout.flush()  # This is needed when we use multiprocessing
     return values
 
 def order_stability_index(values, Rep, K, P):

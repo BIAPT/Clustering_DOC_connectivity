@@ -46,6 +46,7 @@ Rep=1                                #number of Repetitions (Mean at the end)
 
 values = stability_measure.compute_stability_index(data_random, Y_ID_random, P, K, Rep)
 print('Data returned')
+sys.stdout.flush()  # This is needed when we use multiprocessing
 SI_M_rand, SI_SD_rand = stability_measure.order_stability_index(values,Rep,K,P)
 print('Data ordered')
 
