@@ -13,7 +13,7 @@ import multiprocessing as mp
 import os
 import sys
 
-def stability (X, Y_ID, param, ):
+def stability (X, Y_ID, param):
     r=param[0]
     p=param[1]
     k=param[2]
@@ -73,8 +73,7 @@ def stability (X, Y_ID, param, ):
     unequal = 1 - common_val / S_test.shape[0]
     print("END: r = {}, p = {}, k = {}".format(r, p, k))
     sys.stdout.flush()  # This is needed when we use multiprocessing
-
-    #return unequal, r, p, k
+    # #return unequal, r, p, k
     return unequal
 
 
