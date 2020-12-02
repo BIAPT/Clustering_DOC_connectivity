@@ -14,8 +14,10 @@ import os
 import sys
 
 def stability (X_temp_LD, X_test_LD,k):
-    #sys.stdout.flush()  # This is needed when we use multiprocessing
     print("K-MEANS STARTED: k = {}".format(k))
+    sys.stdout.flush()  # This is needed when we use multiprocessing
+
+    """
     kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=100)
     kmeans.fit(X_temp_LD.copy())  # fit the classifier on X_template
     S_temp = kmeans.predict(X_test_LD.copy())
@@ -53,6 +55,12 @@ def stability (X_temp_LD, X_test_LD,k):
     print("END: k = {}".format(k))
     sys.stdout.flush()  # This is needed when we use multiprocessing
     # #return unequal, r, p, k
+    return unequal
+    """
+    unequal = 0
+    print("K-MEANS ENDED: k = {}".format(k))
+    sys.stdout.flush()  # This is needed when we use multiprocessing
+
     return unequal
 
 
@@ -108,6 +116,7 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
             values = [p.get() for p in results]
             print(values)
             print('Parallel Stability index finished')
+            sys.stdout.flush()  # This is needed when we use multiprocessing
 
             #for i, v in enumerate(values):
             #    unequal_percentage = v[0]
