@@ -15,7 +15,7 @@ for mode in ${MODES[@]}; do
     for frequency in ${FREQUENCIES[@]}; do
         for healthy in ${HEALTHY[@]}; do 
 			for steps in ${STEPS[@]}; do 
-				for ((r=1;i<=REP;r++)); do
+				for ((r=1;r<=REP;r++)); do
 					analysis_param="${mode}_${frequency}_${healthy}_${steps}_${r}"
 					echo "${analysis_param}"
 					sbatch --export=ANALYSIS_PARAM=$analysis_param $1
