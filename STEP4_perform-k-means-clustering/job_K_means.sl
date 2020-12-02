@@ -18,4 +18,5 @@ pip install --no-index scikit-learn
 pip install --no-index pandas
 pip install --no-index matplotlib
 pip install --no-index seaborn
+pip install --no-index nilearn
 python STEP4_perform-k-means-clustering/PCA_DOC_Cluster_Combined.py $ANALYSIS_PARAM
