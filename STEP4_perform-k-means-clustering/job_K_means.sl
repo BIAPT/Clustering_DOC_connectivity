@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=stability_all_parallel
+#SBATCH --job-name=final_k_means_model
 #SBATCH --account=def-sblain
 #SBATCH --mem=90000      # increase as needed
-#SBATCH --time=0-03:00:00
+#SBATCH --time=0-00:30:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=40
@@ -17,4 +17,4 @@ pip install --no-index --upgrade pip
 pip install --no-index scikit-learn
 pip install --no-index pandas
 pip install --no-index matplotlib
-python -u compute_stability.py
+python STEP4_perform-k-means-clustering/PCA_DOC_Cluster_Combined.py $ANALYSIS_PARAM
