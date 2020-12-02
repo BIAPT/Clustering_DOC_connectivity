@@ -25,7 +25,7 @@ def stability (X_temp_LD, X_test_LD,k):
 
     print(k)
     kmeans = KMeans(n_clusters=k, max_iter=100, n_init=1)
-    #kmeans.fit(X_temp_LD)  # fit the classifier on X_template
+    kmeans.fit(X_temp_LD)  # fit the classifier on X_template
     #S_temp = kmeans.predict(X_test_LD)
     """
 
