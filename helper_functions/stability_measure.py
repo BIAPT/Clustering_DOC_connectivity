@@ -17,10 +17,11 @@ def stability (X_temp_LD, X_test_LD,k):
     print("K-MEANS STARTED: k = {}".format(k))
     sys.stdout.flush()  # This is needed when we use multiprocessing
 
-    """
+
     kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=100)
     kmeans.fit(X_temp_LD.copy())  # fit the classifier on X_template
     S_temp = kmeans.predict(X_test_LD.copy())
+    """
 
     kmeans = KMeans(n_clusters=k, max_iter=1000, n_init=100)
     kmeans.fit(X_test_LD.copy())  # fit the classifier on X_test
