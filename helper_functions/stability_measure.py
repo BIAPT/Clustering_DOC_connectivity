@@ -107,6 +107,12 @@ def compute_stability_index(X,Y_ID,P,K,Rep):
             X_test_LD = pca.transform(X_test)  # and X_test
             print("PCA FINISHED: r = {}, p = {}".format(r, p))
 
+            print("k-mean test start: r = {}, p = {}".format(r, p))
+            kmeans = KMeans(n_clusters=3, max_iter=100, n_init=1)
+            kmeans.fit(X_temp_LD)  # fit the classifier on X_template
+            S_temp = kmeans.predict(X_test_LD)
+            print("k-mean test END: r = {}, p = {}".format(r, p))
+
             # initialize parallelization to loop over K
             ncpus = int(os.environ.get('SLURM_CPUS_PER_TASK', default=1))
             pool = mp.Pool(processes=ncpus)
