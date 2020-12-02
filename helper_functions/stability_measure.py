@@ -24,8 +24,8 @@ def stability (X_temp_LD, X_test_LD,k):
     sys.stdout.flush()  # This is needed when we use multiprocessing
 
     print(k)
-    kmeans = KMeans(n_clusters=k, max_iter=100, n_init=1)
-    kmeans.fit(X_temp_LD,verbose=1)  # fit the classifier on X_template
+    kmeans = KMeans(n_clusters=k, max_iter=100, n_init=1, verbose = 1)
+    kmeans.fit(X_temp_LD)  # fit the classifier on X_template
     #S_temp = kmeans.predict(X_test_LD)
     """
 
