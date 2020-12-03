@@ -53,7 +53,7 @@ Silhouette Score
 if r == "1":
     SIS = stability_measure.compute_silhouette_score(X, P, K)
     pd.DataFrame(SIS).to_csv(OUTPUT_DIR+"SIS_healthy_{}_{}_10_{}_{}.txt".format(healthy, mode, step, frequency))
-
+    print('Silhouette score finished')
 
 print('THE END')
 
