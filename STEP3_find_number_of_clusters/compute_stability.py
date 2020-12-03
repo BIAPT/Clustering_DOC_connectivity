@@ -36,20 +36,21 @@ Y_ID = data['ID']
 """
 Stability Index
 """
+
+
 P = [3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
 K = [2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
-
+"""
 SI = stability_measure.compute_stability_index(X, Y_ID, P, K, r)
 
 
 pd.DataFrame(SI).to_csv(OUTPUT_DIR + "SI_healthy_{}_{}_10_{}_{}_rep_{}.txt".format(healthy, mode, step, frequency,r))
 print('Stability index finished')
 
-"""
 Silhouette Score
 (only in the first run, no repetition needed)
 """
-if r == 1:
+if r == "1":
     SIS = stability_measure.compute_silhouette_score(X, P, K)
     pd.DataFrame(SIS).to_csv(OUTPUT_DIR+"SIS_healthy_{}_{}_10_{}_{}.txt".format(healthy, mode, step, frequency))
 
