@@ -7,31 +7,26 @@ import numpy as np
 import pandas as pd
 import os
 
-scriptpath = "."
-sys.path.append(os.path.abspath(scriptpath))
+healthy = "Yes"
+mode = "dpli"
+step = "10"
+frequency = "alpha"
+Rep = 2
 
-from helper_functions import stability_measure
-import helper_functions.General_Information as general
+P = [3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
+K = [2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
 
-# This will be given by the srun in the bash file
-# Get the argument
-analysis_param = sys.argv[1]
+SI = np.empty([Rep, len(K), len(P)])  # Collection of stability index over Repetitions
 
-# Parse the parameters
-(mode, frequency, healthy, step, r) = analysis_param.split("_")
+for r in range(Rep):
+    data = pd.read_csv("data/stability/SI_healthy_{}_{}_10_{}_{}_rep_{}.txt".format(healthy, mode, step, frequency,r+1))
+    SI[r,:,:] = data.iloc[:len(K),1:len(P)+1]
 
-# this parameter won't change anything is this part of the analysis
-value = 'Diag'
 
-OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/stability/"
+data = pd.read_csv(OUTPUT_DIR + "SIS_healthy_{}_{}_10_{}_{}.txt".format(healthy, mode, step, frequency), header = None)
 
-_, data, X, Y_out, _, _, _, _ = general.load_data(mode, frequency, step, healthy, value)
 
-#pdf = matplotlib.backends.backend_pdf.PdfPages(OUTPUT_DIR+"SI_SIS_healthy_{}_{}_10_{}_{}.pdf".format(healthy, mode, step, frequency))
-
-#random data with same characteristics as X
-#data_random= np.random.normal(np.mean(X), np.std(X), size=X.shape)
-#Y_ID_random = data['ID']
+pdf = matplotlib.backends.backend_pdf.PdfPages(OUTPUT_DIR+"SI_SIS_healthy_{}_{}_10_{}_{}.pdf".format(healthy, mode, step, frequency))
 
 
 fig,a = plt.subplots(2, 2)

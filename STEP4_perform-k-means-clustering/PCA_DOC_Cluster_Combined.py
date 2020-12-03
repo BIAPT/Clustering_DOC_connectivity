@@ -31,7 +31,6 @@ analysis_param = sys.argv[1]
 model = 'K-means'
 #model = 'HMM'
 
-
 # number of Clusters/ Phases to explore
 KS = [5,6,7]
 PCs = [5,6,7]
