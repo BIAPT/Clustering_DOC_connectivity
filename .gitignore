@@ -7,3 +7,5 @@ data/stability/**
 *.pyc
 *.pyc
 *.pdf
+STEP4_perform-k-means-clustering/mode_dpli_Pkmc_K_6_P_7.txt
+STEP4_perform-k-means-clustering/mode_wpli_Pkmc_K_6_P_7.txt

@@ -1,5 +1,4 @@
 import matplotlib
-#matplotlib.use('Qt5Agg')
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
@@ -13,32 +12,30 @@ import numpy as np
 import pandas as pd
 import sys
 import os
-
-scriptpath = "."
-sys.path.append(os.path.abspath(scriptpath))
-
+import scipy.stats as stats
+from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
 import helper_functions.General_Information as general
 from helper_functions import visualize
 import helper_functions.process_properties as prop
-
-# This will be given by the srun in the bash file
-# Get the argument
-analysis_param = sys.argv[1]
-
-# Parse the parameters
-(mode, frequency, healthy, step, value) = analysis_param.split("_")
+import fpdf
 
 model = 'K-means'
 #model = 'HMM'
+mode = 'wpli'
+frequency = 'alpha'
+step = '10'
+healthy ='Yes'
+value = 'Prog'
 
 # number of Clusters/ Phases to explore
-KS = [5,6,7]
-PCs = [5,6,7]
+KS = [6]
+PCs = [7]
 
-OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/final/"
+OUTPUT_DIR= ""
 
 AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames = general.load_data(mode,
                                                                                         frequency, step, healthy, value)
+
 for PC in PCs:
 
     pdf = matplotlib.backends.backend_pdf.PdfPages(OUTPUT_DIR+"{}_{}_{}_P{}_{}_{}_{}.pdf"
@@ -60,7 +57,6 @@ for PC in PCs:
     pca = PCA(n_components=PC)
     pca.fit(X)
     X7 = pca.transform(X)
-
 
     for k in KS:
         kmc=KMeans(n_clusters=k, random_state=0,n_init=1000)
@@ -97,6 +93,27 @@ for PC in PCs:
             pdf.savefig(fig)
             plt.close()
 
+        #plot all part dynamics
+        all_dyn = np.zeros((len(AllPart["Part"]),35))
+        part_order=np.hstack((AllPart["Part_heal"],AllPart["Part_reco"],AllPart["Part_ncmd"],AllPart["Part_nonr"]))
+
+        for i, part in enumerate(part_order):
+            part_cluster = P_kmc[data['ID'] == part]
+            all_dyn[i,:len(part_cluster)]=part_cluster+1
+
+        my_cmap = plt.get_cmap('PiYG_r', k)
+        my_cmap.set_under('lightgrey')
+        plt.imshow(all_dyn,cmap=my_cmap, vmin =0.001, vmax = k+.5)
+        ax = plt.gca()
+        ax.set_xticks(np.arange(0, 35, 2))
+        ax.set_yticks(np.arange(.5, 33, 1))
+        ax.set_xticklabels(np.arange(0, 35, 2))
+        ax.set_yticklabels(part_order)
+        plt.colorbar()
+        plt.clim(0.5,k + 0.5)
+        pdf.savefig()
+        plt.close()
+
         """
         Cluster Occurence
         """
@@ -104,29 +121,58 @@ for PC in PCs:
         occurence_melt=pd.melt(occurence, id_vars=['group'], value_vars=[str(i) for i in np.arange(k)],
                                value_name="occurence", var_name="State")
 
+        # one with legend
+        plt.figure()
         sns.boxplot(x="State", y="occurence", hue="group",
-                         data=occurence_melt)
+                         data=occurence_melt,palette="muted")
         plt.title('Cluster_Occurence_K-Means')
         pdf.savefig()
         plt.close()
 
-        occ_CRSR = occurence[occurence['ID'].isin(CRSR_ID)]
-        if (occ_CRSR['ID']==CRSR_ID).all:
-            occ_CRSR.insert (0, "CRSR", list(map(float, CRSR_value)) )
+        # one without legend
+        plt.figure()
+        sns.color_palette("colorblind")
+        sns.boxplot(x="State", y="occurence", hue="group",
+                         data=occurence_melt,palette="muted")
+        plt.legend([],[], frameon=False)
+        plt.title('Cluster_Occurence_K-Means')
+        pdf.savefig()
+        plt.close()
 
-        for s in range(k):
-            r, p = scipy.stats.pearsonr(np.array(occ_CRSR[str(s)]), np.array(occ_CRSR['CRSR']))
-            r, p = scipy.stats.pearsonr(np.array(occ_CRSR[str(s)]), np.array(occ_CRSR['CRSR']))
-            sns.set(style='white', font_scale=1.2)
-            g = sns.JointGrid(data=occ_CRSR, x=str(s), y='CRSR')
-            g = g.plot_joint(sns.regplot, color="xkcd:muted blue")
-            plt.xlabel("state {}".format(s))
-            g = g.plot_marginals(sns.distplot, kde=False, bins=12, color="xkcd:bluey grey")
-            g.ax_joint.text(0.2, 0.9, 'r = {0:.2f}, p = {0:.2f}'.format(r,p), fontstyle='italic')
-            plt.tight_layout()
+        for k_tmp in range(k):
+            # statistics:
+            R = occurence[str(k_tmp)][(occurence["group"] == 'Reco_Patients')]
+            N = occurence[str(k_tmp)][(occurence["group"] == 'Nonr_Patients')]
+            C = occurence[str(k_tmp)][(occurence["group"] == 'CMD_Patients')]
+            H = occurence[str(k_tmp)][(occurence["group"] == 'Healthy control')]
+
+            # stats f_oneway functions takes the groups as input and returns F and P-value
+            fvalue, pvalue = stats.f_oneway(R, N, C, H)
+
+            tmp = occurence_melt.copy()
+            tmp = tmp.iloc[np.where(tmp["State"] == str(k_tmp))]
+            plt.figure()
+            sns.boxplot(x="group", y="occurence", data=tmp,
+                        whis=[0, 100], width=.6,palette="muted")
+            sns.stripplot(x="group", y="occurence", data=tmp,
+                          size=4, color=".3", linewidth=0)
+            plt.title("occurence state {} \n f-value {}, p-value {}".format(str(k_tmp),str(fvalue)[0:5],str(pvalue)[0:5]))
+            plt.ylim(0,1)
             pdf.savefig()
             plt.close()
 
+            # perform multiple pairwise comparison (Tukey's HSD)
+            occurence_tmp = occurence_melt[(occurence_melt["State"] == str(k_tmp))]
+            MultiComp = MultiComparison(occurence_tmp['occurence'],
+                                        occurence_tmp['group'])
+            toprint = pd.DataFrame(MultiComp.tukeyhsd().summary())
+
+            fig, ax = plt.subplots(figsize=(12, 4))
+            ax.axis('tight')
+            ax.axis('off')
+            the_table = ax.table(cellText=toprint.values, colLabels=toprint.columns, loc='center')
+            plt.title('Tukeys HSD clutser {}'.format(str(k_tmp)))
+            pdf.savefig(fig, bbox_inches='tight')
 
         """
         Dwell Time
@@ -134,75 +180,123 @@ for PC in PCs:
         dwelltime = prop.calculate_dwell_time(AllPart, P_kmc, data, k, partnames, groupnames)
         dwelltime_melt = pd.melt(dwelltime, id_vars=['group'], value_vars=[str(i) for i in np.arange(k)],
                                      value_name="dwell_time", var_name="State")
-
+        plt.figure()
         sns.boxplot(x="State", y="dwell_time", hue="group",
-                         data=dwelltime_melt)
+                         data=dwelltime_melt, palette="muted")
         plt.title('Dwell_Time_K-Means')
         pdf.savefig()
         plt.close()
 
-        for s in range(k):
-            # create average connectivity image
-            X_conn=np.mean(X.iloc[np.where(P_kmc == s)[0]])
-            visualize.plot_connectivity(X_conn, mode)
+        plt.figure()
+        sns.boxplot(x="State", y="dwell_time", hue="group",
+                         data=dwelltime_melt, palette="muted")
+        plt.title('Dwell_Time_K-Means')
+        plt.legend([], [], frameon=False)
+        pdf.savefig()
+        plt.close()
+
+        for k_tmp in range(k):
+            # statistics:
+            R = dwelltime[str(k_tmp)][(dwelltime["group"] == 'Reco_Patients')]
+            N = dwelltime[str(k_tmp)][(dwelltime["group"] == 'Nonr_Patients')]
+            C = dwelltime[str(k_tmp)][(dwelltime["group"] == 'CMD_Patients')]
+            H = dwelltime[str(k_tmp)][(dwelltime["group"] == 'Healthy control')]
+
+            # stats f_oneway functions takes the groups as input and returns F and P-value
+            fvalue, pvalue = stats.f_oneway(R, N, C, H)
+
+            tmp = dwelltime_melt.copy()
+            tmp = tmp.iloc[np.where(tmp["State"] == str(k_tmp))]
+            plt.figure()
+            sns.boxplot(x="group", y="dwell_time", data=tmp,
+                        whis=[0, 100], width=.6, palette="muted")
+            sns.stripplot(x="group", y="dwell_time", data=tmp,
+                          size=4, color=".3", linewidth=0)
+            plt.title("dwell_time state {} \n f-value {}, p-value {}".format(str(k_tmp), str(fvalue)[0:5], str(pvalue)[0:5]))
             pdf.savefig()
             plt.close()
 
-        dwell_CRSR = dwelltime[dwelltime['ID'].isin(CRSR_ID)]
-        if (dwell_CRSR['ID']==CRSR_ID).all:
-            dwell_CRSR.insert (0, "CRSR", list(map(float, CRSR_value)) )
+            # perform multiple pairwise comparison (Tukey's HSD)
+            dwelltime_tmp = dwelltime_melt[(dwelltime_melt["State"] == str(k_tmp))]
+            MultiComp = MultiComparison(dwelltime_tmp['dwell_time'],
+                                        dwelltime_tmp['group'])
+            toprint = pd.DataFrame(MultiComp.tukeyhsd().summary())
 
-        for s in range(k):
-            r, p = scipy.stats.pearsonr(np.array(dwell_CRSR[str(s)]), np.array(dwell_CRSR['CRSR']))
-            r, p = scipy.stats.pearsonr(np.array(dwell_CRSR[str(s)]), np.array(dwell_CRSR['CRSR']))
-            sns.set(style='white', font_scale=1.2)
-            g = sns.JointGrid(data=dwell_CRSR, x=str(s), y='CRSR')
-            g = g.plot_joint(sns.regplot, color="xkcd:muted blue")
-            plt.xlabel("state {}".format(s))
-            g = g.plot_marginals(sns.distplot, kde=False, bins=12, color="xkcd:bluey grey")
-            g.ax_joint.text(0.2, 0.9 , 'r = {0:.2f}, p = {0:.2f}'.format(r,p), fontstyle='italic')
-            plt.tight_layout()
-            pdf.savefig()
+            fig, ax = plt.subplots(figsize=(12, 4))
+            ax.axis('tight')
+            ax.axis('off')
+            the_table = ax.table(cellText=toprint.values, colLabels=toprint.columns, loc='center')
+            plt.title('Tukeys HSD clutser {}'.format(str(k_tmp)))
+            pdf.savefig(fig, bbox_inches='tight')
+
+            fig = plt.figure()
+            tmp = dwelltime_melt.copy()
+            tmp = tmp.iloc[np.where(tmp["State"] == str(k_tmp))]
+            plt.figure()
+            sns.boxplot(x="group", y="dwell_time", data=tmp,
+                        whis=[0, 100], width=.6,palette="muted")
+            sns.stripplot(x="group", y="dwell_time", data=tmp,
+                          size=4, color=".3", linewidth=0)
+            plt.title("dwelltime state {}".format(str(k_tmp)))
+            pdf.savefig(fig)
             plt.close()
-
 
         """
             Switching Prob
         """
         dynamic = prop.calculate_dynamics(AllPart, P_kmc, data, partnames, groupnames)
 
+        # statistics:
+        R = dynamic['p_switch'][(dynamic["group"] == 'Reco_Patients')]
+        N = dynamic['p_switch'][(dynamic["group"] == 'Nonr_Patients')]
+        C = dynamic['p_switch'][(dynamic["group"] == 'CMD_Patients')]
+        H = dynamic['p_switch'][(dynamic["group"] == 'Healthy control')]
+
+        # stats f_oneway functions takes the groups as input and returns F and P-value
+        fvalue, pvalue = stats.f_oneway(R, N, C, H)
+        plt.figure()
         sns.boxplot(x='p_switch', y="group", data=dynamic,
-                    whis=[0, 100], width=.6)
+                    whis=[0, 100], width=.6, palette="muted")
         sns.stripplot(x='p_switch', y="group", data=dynamic,
                       size=4, color=".3", linewidth=0)
 
-        plt.title("switch state probablilty [%]")
+        plt.title("switch_prob state \n f-value {}, p-value {}".format(str(fvalue)[0:5], str(pvalue)[0:5]))
         pdf.savefig()
         plt.close()
 
+        # perform multiple pairwise comparison (Tukey's HSD)
+        MultiComp = MultiComparison(dynamic['p_switch'],
+                                    dynamic['group'])
+        toprint = pd.DataFrame(MultiComp.tukeyhsd().summary())
 
-        dyn_CRSR = dynamic[dynamic['ID'].isin(CRSR_ID)]
-        if (dyn_CRSR['ID']==CRSR_ID).all:
-            dyn_CRSR.insert (0, "CRSR", list(map(float, CRSR_value)))
+        fig, ax = plt.subplots(figsize=(12, 4))
+        ax.axis('tight')
+        ax.axis('off')
+        the_table = ax.table(cellText=toprint.values, colLabels=toprint.columns, loc='center')
+        plt.title('Tukeys HSD clutser')
+        pdf.savefig(fig, bbox_inches='tight')
 
-        r, p = scipy.stats.pearsonr(np.array(dyn_CRSR['p_switch']), np.array(dyn_CRSR['CRSR']))
-        sns.set(style='white', font_scale=1.2)
-        g = sns.JointGrid(data=dyn_CRSR, x='p_switch', y='CRSR')
-        g = g.plot_joint(sns.regplot, color="xkcd:muted blue")
-        plt.xlabel("switching Probability")
-        g = g.plot_marginals(sns.distplot, kde=False, bins=12, color="xkcd:bluey grey")
-        g.ax_joint.text(0.2, 0.9 , 'r = {0:.2f}, p = {0:.2f}'.format(r,p), fontstyle='italic')
-        plt.tight_layout()
-        pdf.savefig()
-        plt.close()
 
+        """
+            Centroid and Average
+        """
+        centroids = pd.DataFrame(pca.inverse_transform(kmc.cluster_centers_))
+        centroids.columns = X.columns
+
+        # create average connectivity image
+        for s in range(k):
+            X_conn = np.mean(X.iloc[np.where(P_kmc == s)[0]])
+            visualize.plot_connectivity(X_conn, mode)
+            pdf.savefig()
+            plt.close()
+
+            visualize.plot_connectivity(centroids.iloc[s], mode)
+            pdf.savefig()
+            plt.close()
 
         """
             Phase Transition
         """
-        # groupwise Phase Transition
-        visualize.plot_group_TPM(P_kmc,Y_out,k,pdf,groupnames, healthy)
-
         # individual Phase Transition
         for group in partnames:
             fig, ax = plt.subplots(len(AllPart["{}".format(group)]),1, figsize=(5, 50))
@@ -220,10 +314,9 @@ for PC in PCs:
         # group averaged Phase Transition
         visualize.plot_group_averaged_TPM(AllPart,P_kmc,Y_out,k,pdf,data,partnames,groupnames, healthy)
 
+        pd.DataFrame(np.vstack((P_kmc,data['ID']))).to_csv("mode_{}_Pkmc_K_{}_P_{}.txt".format(mode, k, PC))
+
     pdf.close()
     print('finished all with PC {}'.format(PC))
 
 print('THE END')
-
-
-

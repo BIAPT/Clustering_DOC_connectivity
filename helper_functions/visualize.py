@@ -12,8 +12,10 @@ import helper_functions.process_properties as prop
 
 def plot_connectivity(X_conn, mode):
     regions = ['LF','LC','LP','LO','LT','RF','RC','RP','RO','RT']
-    conn_matrix = np.zeros((len(regions), len(regions)))
-    coords = np.loadtxt('../helper_functions/coordinates.txt')
+    try:
+        coords = np.loadtxt('../helper_functions/coordinates.txt')
+    except:
+        coords = np.loadtxt('helper_functions/coordinates.txt')
 
     for t in range(len(X_conn)):
         tmp = X_conn
@@ -30,7 +32,7 @@ def plot_connectivity(X_conn, mode):
 
     conn_matrix = np.array(conn_tmp)
 
-    if mode == 'wPLI':
+    if mode[0] == 'w':
         colormap = matplotlib.cm.get_cmap('OrRd')
         norm = matplotlib.colors.Normalize(vmin=0, vmax=0.3)
         fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0, edge_vmax=0.3,
@@ -38,14 +40,13 @@ def plot_connectivity(X_conn, mode):
                                        node_color=colormap(norm(conn_matrix.diagonal())),
                                        display_mode='lzr')
 
-    if mode == 'dPLI':
+    if mode[0] == 'd':
         colormap = matplotlib.cm.get_cmap('jet')
         norm = matplotlib.colors.Normalize(vmin=0.4, vmax=0.6)
         fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0.4, edge_vmax=0.6,
                                        edge_cmap=colormap, colorbar=True, edge_threshold=None,
                                        node_color=colormap(norm(conn_matrix.diagonal())),
                                        display_mode='lzr')
-
     return fig
 
 def plot_pca_results(pdf,X3,Y_out,groupnames, healthy):
@@ -196,27 +197,6 @@ def plot_pie_and_distribution(pdf,part,part_cluster,k):
 
     ax[1].pie(piedata, labels=clusternames, autopct='%1.1f%%', startangle=90)
     pdf.savefig(fig)
-    plt.close()
-
-def plot_group_TPM(P, Y_out, k, pdf, groupnames, healthy):
-
-    TPM_0 = prop.get_transition_matrix(P[Y_out == 0],k)
-    TPM_1 = prop.get_transition_matrix(P[Y_out == 1],k)
-    TPM_2 = prop.get_transition_matrix(P[Y_out == 2],k)
-    if healthy == 'Yes':
-        TPM_3 = prop.get_transition_matrix(P[Y_out == 3],k)
-
-    f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(12,3))
-    g1 = sns.heatmap(TPM_0, annot=True,cbar=False, ax = ax1, fmt='.1g')
-    g1.set_title(groupnames[0])
-    g2 = sns.heatmap(TPM_1, annot=True,cbar=False, ax = ax2, fmt='.1g')
-    g2.set_title(groupnames[1])
-    g3 = sns.heatmap(TPM_2, annot=True,cbar=False, ax= ax3, fmt='.1g')
-    g3.set_title(groupnames[2])
-    if healthy == 'Yes':
-        g4 = sns.heatmap(TPM_3, annot=True,cbar=False, ax= ax4, fmt='.1g')
-        g4.set_title(groupnames[3])
-    pdf.savefig(f)
     plt.close()
 
 def plot_group_averaged_TPM(AllPart, P, Y_out, k, pdf, data, partnames, groupnames, healthy):
