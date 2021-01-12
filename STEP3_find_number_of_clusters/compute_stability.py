@@ -1,9 +1,11 @@
+"""
+written by CHARLOTTE MASCHKE: DOC Clustering 2020/2021
+This code will be executed by the generate_jobs_step3.sl and will compute the stability index and silhouette score
+for the later analysis.
+It will output many txt files (one per repetition and condition)
+"""
 import sys
 sys.path.append('../')
-from matplotlib import pyplot as plt
-import matplotlib.backends.backend_pdf
-import joblib
-import numpy as np
 import pandas as pd
 import os
 
@@ -27,9 +29,6 @@ OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/stabilit
 
 _, data, X, Y_out, _, _, _, _ = general.load_data(mode, frequency, step, healthy, value)
 
-#random data with same characteristics as X
-#data_random = np.random.normal(np.mean(X), np.std(X), size=X.shape)
-#Y_ID_random = data['ID']
 
 Y_ID = data['ID']
 

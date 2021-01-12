@@ -1,9 +1,11 @@
+"""
+written by CHARLOTTE MASCHKE: DOC Clustering 2020/2021
+this code is used by STEP3 to visualize all steps of the analysis
+"""
+
 import matplotlib
 import numpy as np
-from matplotlib import pyplot as plt
 import pandas as pd
-#matplotlib.use('Qt5Agg')
-import joblib
 from nilearn import plotting
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D

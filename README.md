@@ -12,11 +12,11 @@ To reproduce the analysis or use the code with other data, follow the steps belo
 
 - clone this repo inside your personal directory on Beluga. 
 
-- clone this code, as well as Neuroalgo toolbox in your Compute Canada account (also in the BIAPT github)
+- clone this code, as well as Neuroalgo toolbox in your Compute Canada account (also in the BIAPT GitHub)
 
 - upload all data as .mat files inside your folder "data" using [Globus](https://globus.computecanada.ca/) or scp
 
-- Make sure you have Matlab 2020a with the parallel toolbox intalled on your machine. 
+- Make sure you have Matlab 2020a with the parallel toolbox installed on your machine. 
 
   ## Notes:
 
@@ -58,88 +58,46 @@ This step will calculate the time-resolved functional connectivity with a step s
 
 
 
-## Step 2: Generate the Feature Dataframe
+## Step 2: Generate the Feature DataFrame
 - create a features folder in your results folder on Compute Canada
 - Navigate into the folder `STEP2_load-and-store-fc-data`. Once there open the `extract_features.sl` and modify the parameters to match the resource you want to use and your account on compute Canada. 
 - Once ready you can run the following commands: `sbatch extract_features.sl` assuming the cluster variable is already assigned as show in step 1.
 - this will output your time resolved functional connectivity matrices for all your conditions in the features folder (as pickle and csv)
+- download these files and put them into your local data folder
 
 
 
-## TODO 
+## Step 3: Find the number of clusters
 
-## Step 2: Run the model selection with LOSO cross validation
+- Open the generate_jobs_step3.bash and adapt the parameters and wanted number of repetitions
 
-- Open the commons.py file and make sure that the input and output are correct for your HPC setup and define which epoch, graph and feature category you want to select
+  (start maybe with a smaller number of repetitions to make sure everything works properly)
 
-- crate a folder called  "models" in the "results" folder
+- adapt the job_staility.sl in the step3 folder. 
 
-- Then adapt and run `step_2a_run_all_models.sl` 
+- adapt the output directory in the compute_stability.py (a lot of .txt files will be saved there)
 
-  --> this should fill the "models" folder with a summary of all possible models
+- Run the generate_jobs_step3.bash by typing: ` bash generate_jobs_step3.bash step_3_find_number_of_clusters/job_staility.sl` This will submit one job per condition and repetition. It will take a bit of time. 
 
-- after the job has finished, adapt and run `step_2b_visualize_all_models.sl`
+- Once this is done, you can download the folder with all .txt files, move it to the data folder of your local GitHub folder copy and run "summarize_SI.py " This code will output a pdf with the figures
 
-  --> this should output a .pdf and .txt with the summary of all models. The pdf contains the visual summary of each model with the averaged accuracy and f1 score in the title. The .txt outputs all accuracies and the model with the highest accuracy and F1. 
+**Word of Caution:** The chosen way is not the most optimal method. I have tried to parallelize it in a more optimal way but it did not work (there were some problems to fit the model in the parallelized job) If few conditions or repetitions are needed, this code can be easily adapted to run on a PC.  
 
-  --> Download the pdf and txt and have a look at them
 
-- open the commons.py and select the best_model to be the model with the highest accuracy. 
 
-## Step 3: Run the Final model and visualize the summary
+## Step 4: perform K-means clustering
 
-- Open the commons.py file and make sure that the parameter "best_model" is the model you have selected as your best performing model. (based on the previous step) 
+- this step is executable only on a private machine and is not optimized for Compute Canada. 
+- open the PCA_DOC_Cluster_Combined.py and adapt the output input files 
+- open the helper_function general information and adapt the containing information and datapath (these functions are some kind of data-loader)
+- run the PCA_DOC_Cluster_Combined.py 
+- this outputs a pdf with all images, statistics and results. 
 
-- crate a folder called  "final_models" in the "results" folder
+ 
 
-- Then adapt and run `step_3a_run_final_model.sl` 
+#### Structure of the analysis 
 
-  --> this should fill the "final_models" folder with a summary of the final model's performance in all conditions
-
-- after the job has finished, adapt and run `step_3b_visualize_models.sl`
-
-  --> this should output several .csv files with the accuracy and F1 score for the model in all conditions  
-
-  --> Download these csv files. These are the FINAL ACCURACIES
-
-## Step 4: Run the Final model bootstrap and permutation
-
-- Open the commons.py file and make sure that the parameter "best_model" is the model you have selected as your best performing model. (based on the previous step) 
-
-- crate a folder called  "bootstrap" and "permutation" in the "results" folder
-
-- Inside the step 4 folder, adapt  `job_bootstarp.sl and job_permutation.sl`  to contain your e-mail address
-
-- navigate back to the subfolder  and open "generate_jobs.bash". This bash code contains all conditions you'll run the analysis on. It works like a for loop within a job but submits one individual job for each iteration. This has the advantage of having lots of small jobs instead of one giant job. This reduces the waiting time significantly.  
-
-- Adapt the conditions you want to run and run the following command ` bash generate_jobs.bash step_4_characterize_classification/job_permutation.sl` 
-
-  --> this should fill the "permutation" folder with excel files for all conditions 
-
-- Adapt the conditions you want to run and run the following command ` bash generate_jobs.bash step_4_characterize_classification/job_bootstrap.sl` 
-
-  --> this should fill the "bootstrap" folder with excel files for all conditions 
-
-- You can now download these folders
-
-## Step 5: Visualize the features
-
-- Open the commons.py file and make sure that the parameter "best_model" is the model you have selected as your best performing model. (based on the previous step) 
-
-- adapt and submit the job ` job_step_5_extract_weights.sl` 
-
-  --> it will output you two .csv files  called "feature_weights" + stepsize
-
-- download these and run the figure generation on your own computer to monitor the process: follow the next steps to do so
-
-- copy the feature_weight csv into the step_5_generate_figures/plotting folder. 
-
-- create an empty folder called "figures" (this is where all figures will be saved") 
-
-- Open and adapt ` plot_brain_weights.m`  
-
-  --> this will output many .fig files in the "figures" folder 
-
-  (the parameter features corresponds to the feature which is selected when both graphs are inside the classifier)
-
-  
+- the PCA_DOC_Cluster_Combined.py script access the helper function  general information to load the data
+- the PCA_DOC_Cluster_Combined.py script access the helper function  "process properties" to compute all dynamic properties 
+- the PCA_DOC_Cluster_Combined.py script access the helper function  "statistics " to perform the statistics
+- the PCA_DOC_Cluster_Combined.py script access the helper function  "visualize" to plot all results

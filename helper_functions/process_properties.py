@@ -1,7 +1,19 @@
+"""
+written by CHARLOTTE MASCHKE: DOC Clustering 2020/2021
+this code is used by STEP3 to compute all dynamic properties of the dynamic time series of
+functional connectivity states
+"""
+
 import pandas as pd
 import numpy as np
 
 def calculate_occurence(AllPart,k,P_kmc,data, partnames, groupnames):
+    # this function calculates the occurence rate of one cluster in all participants and groups
+    # allpart: List of all groups and which participants belonf to which group (see general information)
+    # k: number of Clusters/ actual cluster number
+    # data: time resolved functional conn data
+    # partnames: List of all participants (see general information)
+    # groupames: List of names of groups (see general information)
 
     # initialize empty dataframe with k columns + ID+ Group
     occurence = pd.DataFrame(np.empty((len(AllPart["Part"]), k+2)))
@@ -39,6 +51,13 @@ def calculate_occurence(AllPart,k,P_kmc,data, partnames, groupnames):
     return occurence
 
 def calculate_dynamics(AllPart, P_kmc, data, partnames, groupnames):
+    # this function calculates the switching probability
+    # allpart: List of all groups and which participants belonf to which group (see general information)
+    # P_kmc: time series of clusters
+    # data: time resolved functional conn data
+    # partnames: List of all participants (see general information)
+    # groupames: List of names of groups (see general information)
+
     # create empty dataframe with ID, group, p_switch
     dynamic = pd.DataFrame(np.empty((len(AllPart["Part"]), 3)))
     names = ["ID", "group","p_switch"]
@@ -70,6 +89,13 @@ def calculate_dynamics(AllPart, P_kmc, data, partnames, groupnames):
     return dynamic
 
 def calculate_dwell_time(AllPart, P_kmc, data,k, partnames, groupnames):
+    # this function calculates the dwell time
+    # allpart: List of all groups and which participants belonf to which group (see general information)
+    # P_kmc: time series of clusters
+    # data: time resolved functional conn data
+    # partnames: List of all participants (see general information)
+    # groupames: List of names of groups (see general information)
+
     # initializ empty dataframe with k columns + ID + Group
     dwelltime = pd.DataFrame(np.empty((len(AllPart["Part"]), k+2)))
 
@@ -132,6 +158,11 @@ def calculate_dwell_time(AllPart, P_kmc, data,k, partnames, groupnames):
     return dwelltime
 
 def get_transition_matrix(states,n_states):
+    # this function calculates the transition probability matrix
+    # states: time series of clusters
+    # n_states: maximal number of clusters (k)
+    # returns a procentual transition probability matrix
+
     n = n_states
 
     #create empty matrix

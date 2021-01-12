@@ -1,8 +1,16 @@
-import pandas as pd
+"""
+written by CHARLOTTE MASCHKE: DOC Clustering 2020/2021
+this code is used by STEP2 to extract the features
+It only extracts the upper half of a FC matrix
+"""
+
 import numpy as np
 
-
 def extract_single_features(X_step, channels, selection_1, selection_2, time):
+    #X_step: FC data
+    # channels: all channels in this dataset (col and rownames)
+    # selection1 and 2: channels from the area of interest
+    #time: timestep
 
     missing = []
     selected_1 = []

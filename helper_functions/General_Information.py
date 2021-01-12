@@ -1,3 +1,8 @@
+"""
+written by CHARLOTTE MASCHKE: DOC Clustering 2020/2021
+this code is used by STEP3 to load the data and prepare the variables for the analysis
+"""
+
 import pandas as pd
 import numpy as np
 
@@ -16,6 +21,7 @@ def get_data(mode, frequency, step):
     return data
 
 def load_data(mode, frequency, step, healthy, value):
+    # this function takes all analysis parameters and returns the data neede to perform the clustering
 
     AllPart= {}
 

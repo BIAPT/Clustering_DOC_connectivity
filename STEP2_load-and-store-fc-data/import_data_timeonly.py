@@ -1,18 +1,21 @@
+"""
+written by CHARLOTTE MASCHKE: DOC Clustering 2020/2021
+This code contains a list of participants and a list of electrodes which belong to one areas of interest
+It will go through the individual wPLI and dPLI files and select the features (functional connectivity for the regions
+of interest).
+
+It will output a pickle and csv with the features for the ML pipeline
+"""
+
+
 import scipy.io
 import numpy as np
 import sys
-import os
 import pandas as pd
 sys.path.append('../')
 from helper_functions import extract_features
-import os
-import sys
 
-# Add the directory containing your module to the Python path (wants absolute paths)
-#scriptpath = "."
-#sys.path.append(os.path.abspath(scriptpath))
-
-
+# Loop over these parameters
 FREQUENCY = ["alpha", "theta", "delta"]
 STEP = ["10", "01"]
 MODE = ["wpli", "dpli"]

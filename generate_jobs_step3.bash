@@ -8,7 +8,7 @@ FREQUENCIES=("alpha" "theta" "delta")
 #FREQUENCIES=("alpha")
 HEALTHY=("Yes")
 STEPS=("10")
-REP=2
+REP=50
 
 for mode in ${MODES[@]}; do
     for frequency in ${FREQUENCIES[@]}; do

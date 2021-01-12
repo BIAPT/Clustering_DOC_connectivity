@@ -1,11 +1,15 @@
+"""
+written by CHARLOTTE MASCHKE: DOC Clustering 2020/2021
+This code will summarize all individual stability .txt and output
+a pdf with the summarized figures.
+"""
+
 import sys
 sys.path.append('../')
 from matplotlib import pyplot as plt
 import matplotlib.backends.backend_pdf
-import joblib
 import numpy as np
 import pandas as pd
-import os
 
 healthy = "Yes"
 mode = ["dpli", "wpli"]
@@ -19,9 +23,8 @@ pdf = matplotlib.backends.backend_pdf.PdfPages("SI_SIS_healthy_{}_10_{}_all_freq
 P = [3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
 K = [2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
 
-for m in mode:
-    for f in frequency:
-
+for f in frequency:
+    for m in mode:
         SI = np.empty([Rep, len(K)-2, len(P)])  # Collection of stability index over Repetitions
 
         for r in range(Rep):
