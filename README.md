@@ -39,9 +39,8 @@ This step will calculate the time-resolved functional connectivity with a step s
 #### way1:  
 
 - navigate to the results folder and create 2 subdirectories called "wPLI" and "dPLI" inside each of them create the subfolders "step10" and "step01"  (or others depending on your analysis parameters)
--  navigate to`step_0_generate_graphs/`.
-- Move to`STEP1_calculate-time-resolved-functional-connectivity ` Choose wPLI, open the `dPLI_claculation.sl` and modify the parameters to match the resource you want to use and your account on Compute Canada.
-- Open the `dPLI_for_time_resolved.m` file and modify the parameter relating to your cluster setup and path. There are some path that needs to be modified in order for the input/output to make sense in your section of the cluster. 
+- navigate to`STEP1_calculate-time-resolved-functional-connectivity ` Choose wPLI, open the `wPLI_claculation.sl` and modify the parameters to match the resource you want to use and your account on Compute Canada.
+- Open the `wPLI_for_time_resolved.m` file and modify the parameter relating to your cluster setup and path. There are some path that needs to be modified in order for the input/output to make sense in your section of the cluster. 
 - Once ready you can run the following commands: `sbatch  dPLI_claculation.sl`, this will send the job to your cluster
 - Repeat the same procedure for `generate_wpli_graphs`. You do not have to wait for the dPLI graph to be done before you start running the wPLI computation.
 
