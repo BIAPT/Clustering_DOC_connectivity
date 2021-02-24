@@ -73,12 +73,18 @@ def load_data(mode, frequency, step, healthy, value):
         if healthy == 'Yes':
             AllPart["Part_heal"] = ['A03', 'A05', 'A06', 'A07', 'A10', 'A11', 'A12', 'A15', 'A17']
 
-        AllPart["Part_Coma"] = ['S16', 'S17','S19']
+        AllPart["Part_ncmd"] = ['S19', 'W03', 'W08', 'W28', 'W31', 'W34']
 
+        #AllPart["Part_Coma"] = ['S16', 'S17','S19']
+        AllPart["Part_Coma"] = ['S16', 'S17']
+
+        #AllPart["Part_UWS"] = ['S02', 'S07', 'S09', 'S20',  'W22', 'S18', 'S22', 'S23', 'W04', 'W36',
+        #                       'S10', 'S11',  'S13', 'S15', 'W03', 'W28', 'W31', 'W34']
         AllPart["Part_UWS"] = ['S02', 'S07', 'S09', 'S20',  'W22', 'S18', 'S22', 'S23', 'W04', 'W36',
-                               'S10', 'S11',  'S13', 'S15', 'W03', 'W28', 'W31', 'W34']
+                               'S10', 'S11',  'S13', 'S15']
 
-        AllPart["Part_MCS"] = ['W08', 'S05', 'S12']
+        #AllPart["Part_MCS"] = ['W08', 'S05', 'S12']
+        AllPart["Part_MCS"] = ['S05', 'S12']
 
         data = get_data(mode, frequency, step)
 
@@ -93,22 +99,35 @@ def load_data(mode, frequency, step, healthy, value):
         Y_out[data['ID'].isin(AllPart["Part_Coma"])] = 0
         Y_out[data['ID'].isin(AllPart["Part_UWS"])] = 1
         Y_out[data['ID'].isin(AllPart["Part_MCS"])] = 2
+        Y_out[data['ID'].isin(AllPart["Part_ncmd"])] = 4
         if healthy == 'Yes':
             Y_out[data['ID'].isin(AllPart["Part_heal"])] = 3
 
         if healthy == 'Yes':
-            groupnames = ["Coma_Patients", "UWS_Patients", "MCS_Patients", "Healthy control"]
-            partnames = ["Part_Coma", "Part_UWS", "Part_MCS", "Part_heal"]
+            groupnames = ["Coma_Patients", "UWS_Patients", "MCS_Patients", "Healthy control","CMD_Patients"]
+            partnames = ["Part_Coma", "Part_UWS", "Part_MCS", "Part_heal","Part_ncmd"]
         elif healthy == 'No':
-            groupnames = ["Coma_Patients", "UWS_Patients", "MCS_Patients"]
-            partnames = ["Part_Coma", "Part_UWS", "Part_MCS"]
+            groupnames = ["Coma_Patients", "UWS_Patients", "MCS_Patients","CMD_Patients"]
+            partnames = ["Part_Coma", "Part_UWS", "Part_MCS", "Part_ncmd"]
 
+    TSI = [0.3, 9, 0.3, 0.3, 0.3, 1, 2, 8, 21, 0.3, 0.3,
+               0.7, 0.3, 0.3, 0.3, 0.3,
+               14.5, 5, 6, 0.3, 3.5, 6.5, 3.5, 1]
 
+    Status = ['A', 'C', 'A', 'A', 'A', 'C', 'C', 'C', 'C', 'A', 'A',
+              'C', 'A', 'A', 'A', 'A',
+              'C', 'C', 'C', 'A', 'C', 'C', 'C', 'C',
+              'H', 'H', 'H', 'H', 'H', 'H', 'H', 'H', 'H']
+
+    Diag = ['UWS', 'MCS', 'UWS', 'UWS', 'UWS', 'UWS', 'MCS', 'UWS', 'UWS', 'Coma', 'Coma',
+            'UWS', 'CMD', 'UWS', 'UWS', 'UWS',
+            'CMD', 'UWS', 'CMD', 'UWS', 'CMD', 'CMD', 'CMD', 'UWS',
+            'H','H','H','H','H','H','H','H','H']
 
     CRSR_ID=['S02', 'S05', 'S07', 'S09', 'S10', 'S11', 'S12', 'S13', 'S15', 'S16', 'S17',
                             'S18', 'S19', 'S20', 'S22', 'S23',
                             'W03', 'W04', 'W08', 'W22', 'W28', 'W31', 'W34', 'W36']
     CRSR_value=[4, 10, 12, 4, 5, 6, 11, 5, 8, 0, 0, 5, 0, 3, 5, 5, 6, 6, 8, 7, 6, 5, 5, 4]
 
-    return AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames
+    return AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames, Status, Diag, TSI
 

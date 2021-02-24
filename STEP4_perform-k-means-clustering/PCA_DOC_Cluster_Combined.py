@@ -29,10 +29,10 @@ mode = 'wpli' # can be dPLI
 frequency = 'alpha' # can be theta and delta
 step = '10' #can be '1' (stepsize)
 healthy ='Yes' # can be 'No' (analysis with and without healthy participants)
-value = 'Prog' # can be 'Diag' (prognostic value and diagnostic value)
-palett = "muted" # to have different colors for prognosis and diagnosis
-#value = 'Diag'
-#palett = "Spectral_r"
+#value = 'Prog' # can be 'Diag' (prognostic value and diagnostic value)
+#palett = "muted" # to have different colors for prognosis and diagnosis
+value = 'Diag'
+palett = "Spectral_r"
 
 # number of Clusters/ Phases to explore
 KS = [6]
@@ -40,12 +40,11 @@ PCs = [7]
 
 OUTPUT_DIR= ""
 
-AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames = general.load_data(mode,
-                                                                                        frequency, step, healthy, value)
+AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames, Status, Diag, TSI = general.load_data(mode,frequency, step, healthy, value)
 
 for PC in PCs:
 
-    pdf = matplotlib.backends.backend_pdf.PdfPages(OUTPUT_DIR+"{}_{}_{}_P{}_{}_{}_{}_K{}.pdf"
+    pdf = matplotlib.backends.backend_pdf.PdfPages(OUTPUT_DIR+"{}_{}_{}_P{}_{}_{}_{}_K{}_test.pdf"
                                                    .format(frequency, mode, model,str(PC), healthy, step, value, str(KS)))
 
     """
@@ -182,8 +181,11 @@ for PC in PCs:
             C = occurence[str(k_tmp)][(occurence["group"] == groupnames[1])]
             R = occurence[str(k_tmp)][(occurence["group"] == groupnames[2])]
             H = occurence[str(k_tmp)][(occurence["group"] == groupnames[3])]
-
-            fvalue, pvalue, test = stats.ANOVA_assumptions_test(R,N,C,H)
+            if value == 'Diag':
+                NC = occurence[str(k_tmp)][(occurence["group"] == groupnames[4])]
+                fvalue, pvalue, test = stats.ANOVA_assumptions_test_Diag(R, N, C, H, NC)
+            else:
+                fvalue, pvalue, test = stats.ANOVA_assumptions_test(R, N, C, H)
 
             tmp = occurence_melt.copy()
             tmp = tmp.iloc[np.where(tmp["State"] == str(k_tmp))]
@@ -251,8 +253,11 @@ for PC in PCs:
             C = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[1])]
             R = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[2])]
             H = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[3])]
-
-            fvalue, pvalue, test = stats.ANOVA_assumptions_test(R, N, C, H)
+            if value == 'Diag':
+                NC = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[4])]
+                fvalue, pvalue, test = stats.ANOVA_assumptions_test_Diag(R, N, C, H, NC)
+            else:
+                fvalue, pvalue, test = stats.ANOVA_assumptions_test(R, N, C, H)
 
             tmp = dwelltime_melt.copy()
             tmp = tmp.iloc[np.where(tmp["State"] == str(k_tmp))]
@@ -298,8 +303,12 @@ for PC in PCs:
         C = dynamic['p_switch'][(dynamic["group"] == groupnames[1])]
         R = dynamic['p_switch'][(dynamic["group"] == groupnames[2])]
         H = dynamic['p_switch'][(dynamic["group"] == groupnames[3])]
+        if value == 'Diag':
+            NC = dynamic['p_switch'][(dynamic["group"] == groupnames[4])]
+            fvalue, pvalue, test = stats.ANOVA_assumptions_test_Diag(R, N, C, H, NC)
+        else:
+            fvalue, pvalue, test = stats.ANOVA_assumptions_test(R, N, C, H)
 
-        fvalue, pvalue, test = stats.ANOVA_assumptions_test(R, N, C, H)
 
         plt.figure()
         sns.boxplot(x='p_switch', y="group", data=dynamic,
@@ -332,6 +341,19 @@ for PC in PCs:
         the_table = ax.table(cellText=toprint.values, colLabels=toprint.columns, loc='center')
         plt.title('{} '.format(title))
         pdf.savefig(fig, bbox_inches='tight')
+
+        dynamic['Status'] = Status
+        fig = plt.figure()
+        sns.boxplot(x='p_switch', y="group", data=dynamic,
+                    whis=[0, 100], width=.6, palette=palett)
+        sns.stripplot(x='p_switch', y="group", hue='Status', data=dynamic,
+                      size=6, linewidth=0.2, palette=sns.color_palette("bright", 3))
+
+        plt.title("switch_prob state chronic_acute_points")
+        plt.yticks(fontsize=14)
+        plt.savefig("{}_k_{}_p_{}_switchingprob_chronic_acute_points.jpeg".format(model, k, PC))
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.show()
 
         """
             Centroid and Average
@@ -380,3 +402,19 @@ for PC in PCs:
 
 print('THE END')
 
+# library & dataset
+import seaborn as sns
+
+dyn_DOC = dynamic[np.isin(dynamic['ID'], CRSR_ID)]
+dyn_DOC['CRSR']= CRSR_value
+#dyn_DOC['TSI']= TSI
+
+#dyn_DOC = dyn_DOC[dyn_DOC['Status']!='C']
+
+# use the function regplot to make a scatterplot
+sns.regplot(x=dyn_DOC["CRSR"], y=dyn_DOC["p_switch"])
+plt.show()
+
+# use the function regplot to make a scatterplot
+#sns.regplot(x=dyn_DOC["TSI"], y=dyn_DOC["p_switch"])
+#plt.show()

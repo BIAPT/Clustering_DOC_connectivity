@@ -27,7 +27,7 @@ P_IDS = {'MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', '
 
 %% wPLI Parameters:
 p_value = 0.05;
-number_surrogates = 10;
+number_surrogates = 20;
 
 if FREQUENCY == "alpha"
     low_frequency = 8;

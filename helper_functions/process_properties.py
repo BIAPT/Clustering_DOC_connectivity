@@ -43,6 +43,9 @@ def calculate_occurence(AllPart,k,P_kmc,data, partnames, groupnames):
             elif np.isin(t, AllPart[partnames[3]]):
                 occurence.loc[c, 'group'] = groupnames[3]
 
+            elif np.isin(t, AllPart[partnames[4]]):
+                occurence.loc[c, 'group'] = groupnames[4]
+
             # calculate and insert occurence
             occurence.loc[c,str(s)] = (len(np.where((P_kmc == s) & (data['ID'] == t))[0]))\
                                       /len(np.where(data['ID'] == t)[0])
@@ -79,6 +82,9 @@ def calculate_dynamics(AllPart, P_kmc, data, partnames, groupnames):
 
         elif np.isin(t,AllPart[partnames[3]]):
             dynamic.loc[c, 'group'] = groupnames[3]
+
+        elif np.isin(t,AllPart[partnames[4]]):
+            dynamic.loc[c, 'group'] = groupnames[4]
 
         part_cluster = P_kmc[data['ID'] == t]
         switch = len(np.where(np.diff(part_cluster) != 0)[0])/(len(part_cluster)-1)
@@ -120,6 +126,9 @@ def calculate_dwell_time(AllPart, P_kmc, data,k, partnames, groupnames):
 
         elif np.isin(t,AllPart[partnames[3]]):
             dwelltime.loc[c, 'group'] = groupnames[3]
+
+        elif np.isin(t,AllPart[partnames[4]]):
+            dwelltime.loc[c, 'group'] = groupnames[4]
 
         # extract cluster of this participant
         part_cluster = P_kmc[data['ID'] == t]
