@@ -27,7 +27,7 @@ from scikit_posthocs import posthoc_dunn
 model = 'K-means'
 mode = 'wpli' # can be dPLI
 frequency = 'alpha' # can be theta and delta
-step = '10' #can be '1' (stepsize)
+step = '01' #can be '1' (stepsize)
 healthy ='Yes' # can be 'No' (analysis with and without healthy participants)
 #value = 'Prog' # can be 'Diag' (prognostic value and diagnostic value)
 #palett = "muted" # to have different colors for prognosis and diagnosis

@@ -3,15 +3,15 @@
 % The matrices will be generated twice: once with overlapping and
 % once with non-overlapping windows in the alpha bandwidth.  
 
-%FREQUENCY = "alpha";
+FREQUENCY = "alpha";
 %FREQUENCY = "theta";
-FREQUENCY = "delta";
+%FREQUENCY = "delta";
 
 
 % Remote Source Setup
 %
 INPUT_DIR = '/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/BASELINE_5min_250Hz';
-OUTPUT_DIR = strcat("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/", FREQUENCY, "/wpli/");
+OUTPUT_DIR = strcat("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_", FREQUENCY, "/wpli/");
 NEUROALGO_PATH = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/NeuroAlgo";
 addpath(genpath(NEUROALGO_PATH)); % Add NA library to our path so that we can use it
 

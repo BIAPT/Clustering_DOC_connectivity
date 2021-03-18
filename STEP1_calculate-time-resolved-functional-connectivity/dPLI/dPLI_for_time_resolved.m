@@ -3,15 +3,15 @@
 % The matrices will be generated twice: once with overlapping and
 % once with non-overlapping windows in the alpha bandwidth.  
 
-%FREQUENCY = "alpha";
+FREQUENCY = "alpha";
 %FREQUENCY = "theta";
-FREQUENCY = "delta";
+%FREQUENCY = "delta";
 
 
 % Remote Source Setup
 %
 INPUT_DIR = '/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/BASELINE_5min_250Hz';
-OUTPUT_DIR = strcat("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/", FREQUENCY, "/dpli/");
+OUTPUT_DIR = strcat("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_", FREQUENCY, "/dpli/");
 NEUROALGO_PATH = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/NeuroAlgo";
 addpath(genpath(NEUROALGO_PATH)); % Add NA library to our path so that we can use it
 
@@ -45,7 +45,8 @@ end
 % Size of the cuts for the data
 window_size = 10; % in seconds
 %this parameter is set to 1 (overlapping windows)and 10(non-overlapping windows).
-step_sizes = ["01", "10"]; % in seconds
+%step_sizes = ["01", "10"]; % in seconds
+step_sizes = ["10"]; % in seconds
 
 
 %% loop over all particiopants and stepsizes and calculate dpli
