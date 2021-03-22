@@ -17,6 +17,7 @@ from helper_functions import extract_features
 
 # Loop over these parameters
 FREQUENCY = ["alpha", "theta", "delta"]
+#FREQUENCY = ["alpha"]
 STEP = ["10", "01"]
 MODE = ["wpli", "dpli"]
 
@@ -52,8 +53,11 @@ ROI = ['LF_LC', 'LF_LP', 'LF_LO', 'LF_LT',
 for frequency in FREQUENCY:
     for step in STEP:
         for mode in MODE:
-            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/features/"
-            INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/{}/{}/step{}".format(frequency, mode, step)
+            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_features/"
+            INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_{}/{}/step{}"\
+                .format(frequency, mode, step)
+            #OUTPUT_DIR = "../data/"
+            #INPUT_DIR = "../data/new_{}/{}/step{}".format(frequency, mode, step)
             # empty dataframe for all participants
             df_wpli_final = pd.DataFrame()
 
@@ -161,7 +165,7 @@ for frequency in FREQUENCY:
 
                         conn, missing = extract_features.extract_single_features(X_step=data[t].copy(), channels=channels,
                                                                       selection_1=regions[r1], selection_2=regions[r2],
-                                                                      time=t)
+                                                                      time=t, mode = mode)
                         missingel.extend(missing)
                         df_wpli.iloc[t, i] = conn
 

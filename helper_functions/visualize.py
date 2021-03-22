@@ -36,18 +36,18 @@ def plot_connectivity(X_conn, mode):
 
     if mode[0] == 'w':
         colormap = matplotlib.cm.get_cmap('OrRd')
-        norm = matplotlib.colors.Normalize(vmin=0, vmax=0.3)
+        #norm = matplotlib.colors.Normalize(vmin=0, vmax=0.3)
         fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0, edge_vmax=0.3,
                                        edge_cmap=colormap, colorbar=True, edge_threshold=None,
-                                       node_color=colormap(norm(conn_matrix.diagonal())),
+                                       node_color=colormap(conn_matrix.diagonal()),
                                        display_mode='lzr')
 
     if mode[0] == 'd':
         colormap = matplotlib.cm.get_cmap('jet')
-        norm = matplotlib.colors.Normalize(vmin=0.4, vmax=0.6)
+        #norm = matplotlib.colors.Normalize(vmin=0.4, vmax=0.6)
         fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0.4, edge_vmax=0.6,
                                        edge_cmap=colormap, colorbar=True, edge_threshold=None,
-                                       node_color=colormap(norm(conn_matrix.diagonal())),
+                                       node_color=colormap(conn_matrix.diagonal()),
                                        display_mode='lzr')
     return fig
 

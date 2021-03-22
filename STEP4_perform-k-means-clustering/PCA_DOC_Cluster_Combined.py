@@ -31,11 +31,12 @@ step = '10' #can be '1' (stepsize)
 healthy ='Yes' # can be 'No' (analysis with and without healthy participants)
 #value = 'Prog' # can be 'Diag' (prognostic value and diagnostic value)
 #palett = "muted" # to have different colors for prognosis and diagnosis
-value = 'Diag'
-palett = "Spectral_r"
+value = 'Prog'
+palett = "muted"
+#palett = "Spectral_r"
 
 # number of Clusters/ Phases to explore
-KS = [6]
+KS = [5]
 PCs = [7]
 
 OUTPUT_DIR= ""
@@ -353,7 +354,7 @@ for PC in PCs:
         plt.yticks(fontsize=14)
         plt.savefig("{}_k_{}_p_{}_switchingprob_chronic_acute_points.jpeg".format(model, k, PC))
         pdf.savefig(fig, bbox_inches='tight')
-        plt.show()
+        plt.close()
 
         """
             Centroid and Average
@@ -402,6 +403,7 @@ for PC in PCs:
 
 print('THE END')
 
+"""
 # library & dataset
 import seaborn as sns
 
@@ -418,3 +420,4 @@ plt.show()
 # use the function regplot to make a scatterplot
 #sns.regplot(x=dyn_DOC["TSI"], y=dyn_DOC["p_switch"])
 #plt.show()
+"""

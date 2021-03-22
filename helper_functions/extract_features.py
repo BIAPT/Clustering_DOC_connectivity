@@ -6,7 +6,7 @@ It only extracts the upper half of a FC matrix
 
 import numpy as np
 
-def extract_single_features(X_step, channels, selection_1, selection_2, time):
+def extract_single_features(X_step, channels, selection_1, selection_2, time,mode):
     #X_step: FC data
     # channels: all channels in this dataset (col and rownames)
     # selection1 and 2: channels from the area of interest
@@ -39,9 +39,11 @@ def extract_single_features(X_step, channels, selection_1, selection_2, time):
                 done.append(str(a)+'_'+str(b))
                 # if the inverse connectivity is not in the data already:
                 if done.__contains__(str(b)+'_'+str(a)) == False:
-                    #X_step[min(a, b), max(a, b)] = 200  # !! Just activate for test purpose
                     PLI.append(X_step[min(a, b), max(a, b)])
-                    #print(channels[a],channels[b],X_step[min(a, b), max(a, b)])
+
+    if mode == 'dpli':
+        # return the absolute strength of direction, but not the direction itself
+        PLI = abs(np.array(PLI) - 0.5)
 
     return np.mean(PLI), missing
 
