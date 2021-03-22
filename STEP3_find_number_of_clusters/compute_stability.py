@@ -25,7 +25,7 @@ analysis_param = sys.argv[1]
 # this parameter won't change anything is this part of the analysis
 value = 'Diag'
 
-OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/stability/"
+OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_stability/"
 
 _, data, X, Y_out, _, _, _, _ = general.load_data(mode, frequency, step, healthy, value)
 

@@ -8,11 +8,13 @@ import numpy as np
 
 def get_data(mode, frequency, step):
     # import data
+    data = pd.read_csv("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_features/33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
+    """
     try:
         data = pd.read_csv("../data/33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
     except:
         data = pd.read_csv("data/33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
-
+    """
     if data.columns[0] != 'Name':
         del data[data.columns[0]]
 
