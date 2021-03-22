@@ -27,8 +27,7 @@ value = 'Diag'
 
 OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_stability/"
 
-_, data, X, Y_out, _, _, _, _ = general.load_data(mode, frequency, step, healthy, value)
-
+_, data, X, Y_out, _, _, _, _, _, _, _ = general.load_data(mode, frequency, step, healthy, value)
 
 Y_ID = data['ID']
 
