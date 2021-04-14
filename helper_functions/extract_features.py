@@ -41,9 +41,9 @@ def extract_single_features(X_step, channels, selection_1, selection_2, time,mod
                 if done.__contains__(str(b)+'_'+str(a)) == False:
                     PLI.append(X_step[min(a, b), max(a, b)])
 
-    if mode == 'dpli':
+    #if mode == 'dpli':
         # return the absolute strength of direction, but not the direction itself
-        PLI = abs(np.array(PLI) - 0.5)
+        #PLI = abs(np.array(PLI) - 0.5)
 
     return np.mean(PLI), missing
 
