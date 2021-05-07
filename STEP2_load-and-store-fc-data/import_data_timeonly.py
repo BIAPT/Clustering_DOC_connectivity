@@ -53,11 +53,9 @@ ROI = ['LF_LC', 'LF_LP', 'LF_LO', 'LF_LT',
 for frequency in FREQUENCY:
     for step in STEP:
         for mode in MODE:
-            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_new_features/"
+            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_features/"
             INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_{}/{}/step{}"\
                 .format(frequency, mode, step)
-            #OUTPUT_DIR = "../data/"
-            #INPUT_DIR = "../data/new_{}/{}/step{}".format(frequency, mode, step)
             # empty dataframe for all participants
             df_wpli_final = pd.DataFrame()
 
