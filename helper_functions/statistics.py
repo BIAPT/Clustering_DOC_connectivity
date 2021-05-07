@@ -5,6 +5,34 @@ this code is used by STEP3 to compute the statics for the analsis
 import numpy as np
 import scipy.stats as stats
 from scipy.stats import levene
+from scipy.stats import ttest_ind
+
+def run_comparison(group1, group2):
+    """
+    This function runs assumption test for equal variance and performs the t
+    or welch test
+    :param group1: group1_values
+    :param group2: group2_values
+    :return: string with bonferroni corrected p-values or reason for no test
+    """
+    # test for equal variances
+    if np.var(group1)==0 or np.var(group2)==0:
+        return("Null-var", np.nan )
+
+    else:
+        # test for equal variance
+        _, p = levene(group1, group2)
+        if np.array(p) > 0.05:
+            equ_var = True
+        if np.array(p) <= 0.05:
+            equ_var = False
+
+        # t-test or welch test:
+        t, p = ttest_ind(group1, group2, equal_var = equ_var)
+        # Bonferroni_adjustment
+        # Create a list of the adjusted p-values
+
+        return("t={0:.3f}".format(t), p)
 
 
 def ANOVA_assumptions_test(R,N,C,H):

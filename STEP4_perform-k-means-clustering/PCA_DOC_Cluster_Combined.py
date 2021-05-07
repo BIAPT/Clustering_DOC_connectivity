@@ -13,411 +13,325 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 import pandas as pd
-from hmmlearn import hmm
-from statsmodels.stats.multicomp import MultiComparison
 import helper_functions.General_Information as general
 import helper_functions.statistics as stats
 from helper_functions import visualize
 import helper_functions.process_properties as prop
-from scikit_posthocs import posthoc_dunn
+from scipy.stats import pearsonr
+from statsmodels.sandbox.stats.multicomp import multipletests
 
 
-# define the analysis parameters
-
-model = 'K-means'
-mode = 'wpli' # can be dPLI
-frequency = 'alpha' # can be theta and delta
-step = '10' #can be '1' (stepsize)
-healthy ='Yes' # can be 'No' (analysis with and without healthy participants)
-#value = 'Prog' # can be 'Diag' (prognostic value and diagnostic value)
-#palett = "muted" # to have different colors for prognosis and diagnosis
-value = 'Prog'
-palett = "muted"
-#palett = "Spectral_r"
+"""
+Analysis Parameters
+"""
+mode = 'dpli' # type of functional connectivity: can be dpli/ wpli
+frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
+step = '10' # stepsize: can be '1'
+palett = "muted" # color palette
+saveimg = True # if you want to save all images as seperate files
 
 # number of Clusters/ Phases to explore
-KS = [5]
-PCs = [7]
+k = 5   # numbser of k-clustes
+PC = 8   # number of PC principal components
 
-OUTPUT_DIR= ""
+# load the data
+AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames, Status, Diag, TSI, Age = \
+    general.load_data(mode,frequency, step)
 
-AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames, Status, Diag, TSI = general.load_data(mode,frequency, step, healthy, value)
+# set up an empty pdf
+pdf = matplotlib.backends.backend_pdf.PdfPages("{}_{}_P{}_{}_K{}.pdf"
+                                               .format(frequency, mode,str(PC), step, str(k)))
 
-for PC in PCs:
+"""
+    1) Run PCA with 3 PCS for visualization only
+"""
+pca = PCA(n_components=3)
+pca.fit(X)
+X3 = pca.transform(X)
 
-    pdf = matplotlib.backends.backend_pdf.PdfPages(OUTPUT_DIR+"{}_{}_{}_P{}_{}_{}_{}_K{}_test.pdf"
-                                                   .format(frequency, mode, model,str(PC), healthy, step, value, str(KS)))
+visualize.plot_pca_results(pdf, X3, Y_out, groupnames)
+print("#######  visualization PCA Completed ")
 
-    """
-        PCA - all_participants
-    """
-    pca = PCA(n_components=3)
-    pca.fit(X)
-    X3 = pca.transform(X)
+"""
+   2) Run K_means on PC principal components and k Clusters
+"""
+# Fit PCA and transform X
+pca = PCA(n_components=PC)
+pca.fit(X)
+X_reduced = pca.transform(X)
 
-    visualize.plot_pca_results(pdf, X3, Y_out, groupnames, healthy)
-    print("#######  PCA Completed ")
+# fit K-means on reduced X and k clusters
+kmc=KMeans(n_clusters=k, random_state=0, n_init=1000)
+kmc.fit(X_reduced)
+P_kmc=kmc.predict(X_reduced)
+print("#######  K-means with k={} done".format(k))
 
-    """
-        K_means 7 PC
-    """
-    pca = PCA(n_components=PC)
-    pca.fit(X)
-    X7 = pca.transform(X)
+# visualize the explained variance and the clustering result in a 3D space
+visualize.plot_explained_variance(pdf,pca)
+visualize.plot_clustered_pca(pdf,X3,Y_out,P_kmc,k,groupnames)
 
-    for k in KS:
-        if model == "K-means":
-            kmc=KMeans(n_clusters=k, random_state=0,n_init=1000)
-            kmc.fit(X7)
-            P_kmc=kmc.predict(X7)
+# visualize the distribution and pie-chart for every single participant
+for part in AllPart["Part"]:
+    part_cluster = P_kmc[data['ID']==part]
+    visualize.plot_pie_and_distribution(pdf, part, part_cluster, k)
 
-        if model == "HMM":
-            # create HMM
-            scores = []
-            models = []
-
-            for i in range(10):
-                model_tmp = hmm.GaussianHMM(n_components=k, covariance_type="full", n_iter=100)
-                model_tmp.fit(X7)
-                scores.append(model_tmp.score(X7))
-                models.append(model_tmp)
-
-            # select model with highest score
-            model_best = models[np.where(scores == max(scores))[0][0]]
-
-            if model_best.monitor_.converged == False:
-                print('Model not Converged Error')
-                break
-
-            P_kmc = model_best.predict(X7)
-
-        visualize.plot_explained_variance(pdf,pca)
-        visualize.plot_clustered_pca(pdf,X3,Y_out,P_kmc,k,groupnames, healthy)
-
-        for part in AllPart["Part"]:
-
-            part_cluster = P_kmc[data['ID']==part]
-            visualize.plot_pie_and_distribution(pdf, part, part_cluster, k)
-
-        print("#######  {} with k={} started".format(model,k))
-
-        for group in partnames:
-            fig, ax = plt.subplots(len(AllPart["{}".format(group)]), 1, figsize=(5, 40))
-            fig.suptitle('{}; \n {}_Clusters_wholeBrain_alpha'.format(group, k), size=16)
-            c = 0
-            for part in AllPart["{}".format(group)]:
-                #part=AllPart["{}".format(group)][part]
-                part_cluster = P_kmc[data['ID'] == part]
-
-                piedata = []
-                clusternames = []
-                for i in range(k):
-                    piedata.append(list(part_cluster).count(i))
-                    clusternames.append('c ' + str(i))
-
-                ax[c].pie(piedata, labels=clusternames, startangle=90)
-                ax[c].set_title('Participant: '+part)
-                c +=1
-            pdf.savefig(fig)
-            plt.close()
-
-        #plot all part dynamics
-        all_dyn = np.zeros((len(AllPart["Part"]),35))
-        #part_order=np.hstack((AllPart["Part_heal"],AllPart["Part_reco"],AllPart["Part_ncmd"],AllPart["Part_nonr"]))
-        if healthy == "Yes":
-            part_order=np.hstack((AllPart[partnames[0]],AllPart[partnames[1]],AllPart[partnames[2]],AllPart[partnames[3]]))
-        if healthy == "No":
-            part_order=np.hstack((AllPart[partnames[0]],AllPart[partnames[1]],AllPart[partnames[2]]))
-
-        for i, part in enumerate(part_order):
-            part_cluster = P_kmc[data['ID'] == part]
-            all_dyn[i,:len(part_cluster)]=part_cluster+1
+# visualize the time-series for all participants
+visualize.plot_all_timeseries(pdf, AllPart,P_kmc, data, k, saveimg )
 
 
-        my_cmap = plt.get_cmap('viridis', k)
-        my_cmap.set_under('lightgrey')
-        plt.imshow(all_dyn,cmap=my_cmap, vmin =0.001, vmax = k+.5, alpha=0.7)
-        ax = plt.gca()
-        ax.set_xticks(np.arange(0, 35, 2))
-        ax.set_yticks(np.arange(.5, len(part_order), 1))
-        ax.set_xticklabels(np.arange(0, 35, 2))
-        ax.set_yticklabels(part_order)
-        plt.colorbar()
-        plt.clim(0.5,k + 0.5)
+"""
+    3) Calculate Cluster Occurence
+"""
+occurence = prop.calculate_occurence(AllPart, k, P_kmc, data, partnames, groupnames)
+occurence_melt = pd.melt(occurence, id_vars=['group'], value_vars=[str(i) for i in np.arange(k)],
+                       value_name="occurence", var_name="State")
 
-        pdf.savefig()
-        plt.savefig("{}_alldynamics.jpeg".format(model))
-        plt.close()
+# Plot the results
+plt.figure()
+sns.boxplot(x="State", y="occurence", hue="group",
+                 data=occurence_melt,palette=palett)
+plt.title('Cluster_Occurence_K-Means')
+pdf.savefig()
+plt.legend([],[], frameon=False)
+pdf.savefig()
+if saveimg:
+    plt.savefig("k_{}_p_{}_occurence.jpeg".format(k, PC))
+plt.close()
 
-        """
-        Cluster Occurence
-        """
-        occurence = prop.calculate_occurence(AllPart,k,P_kmc,data,partnames, groupnames)
-        occurence_melt=pd.melt(occurence, id_vars=['group'], value_vars=[str(i) for i in np.arange(k)],
-                               value_name="occurence", var_name="State")
+occurence.to_csv("occurence_state_{}.csv".format(mode), index=False, sep=';')
 
-        # one with legend
-        plt.figure()
-        sns.boxplot(x="State", y="occurence", hue="group",
-                         data=occurence_melt,palette=palett)
-        plt.title('Cluster_Occurence_K-Means')
-        pdf.savefig()
-        plt.savefig("{}_k_{}_p_{}_occurence.jpeg".format(model, k, PC))
-        plt.close()
-
-        # one without legend
-        plt.figure()
-        sns.color_palette("colorblind")
-        sns.boxplot(x="State", y="occurence", hue="group",
-                         data=occurence_melt,palette=palett)
-        plt.legend([],[], frameon=False)
-        plt.title('Cluster_Occurence_K-Means')
-        pdf.savefig()
-        plt.savefig("{}_k_{}_p_{}_occurence2.jpeg".format(model, k, PC))
-        plt.close()
-
-        for k_tmp in range(k):
-            # statistics:
-            N = occurence[str(k_tmp)][(occurence["group"] == groupnames[0])]
-            C = occurence[str(k_tmp)][(occurence["group"] == groupnames[1])]
-            R = occurence[str(k_tmp)][(occurence["group"] == groupnames[2])]
-            H = occurence[str(k_tmp)][(occurence["group"] == groupnames[3])]
-            if value == 'Diag':
-                NC = occurence[str(k_tmp)][(occurence["group"] == groupnames[4])]
-                fvalue, pvalue, test = stats.ANOVA_assumptions_test_Diag(R, N, C, H, NC)
-            else:
-                fvalue, pvalue, test = stats.ANOVA_assumptions_test(R, N, C, H)
-
-            tmp = occurence_melt.copy()
-            tmp = tmp.iloc[np.where(tmp["State"] == str(k_tmp))]
-            plt.figure()
-            sns.boxplot(x="group", y="occurence", data=tmp,
-                        whis=[0, 100], width=.6,palette = palett)
-            sns.stripplot(x="group", y="occurence", data=tmp,
-                          size=4, color=".3", linewidth=0)
-            plt.title("occurence state {} \n {} f-value {}, p-value {}\n".format(str(k_tmp),str(fvalue)[0:5],test, str(pvalue)[0:5]))
-            plt.yticks(fontsize=14)
-            pdf.savefig()
-            plt.savefig("{}_k_{}_p_{}_occurence_state{}.jpeg".format(model,k,PC,str(k_tmp)))
-            plt.close()
-
-            occurence_tmp = occurence_melt[(occurence_melt["State"] == str(k_tmp))]
-
-            #POSTHOC TEST
-            if test =='kruskal':
-                toprint = posthoc_dunn(occurence_tmp, val_col='occurence', group_col='group', p_adjust='bonferroni')
-                title = "DUNN Test"
-
-            if test =='ANOVA':
-                # perform multiple pairwise comparison (Tukey's HSD)
-                MultiComp = MultiComparison(occurence_tmp['occurence'],
-                                            occurence_tmp['group'])
-                toprint = pd.DataFrame(MultiComp.tukeyhsd().summary())
-                title = "TUKEY Test"
-
-            fig, ax = plt.subplots(figsize=(12, 4))
-            ax.axis('tight')
-            ax.axis('off')
-            the_table = ax.table(cellText=toprint.values, colLabels=toprint.columns, loc='center')
-            plt.title('{} clutser {}'.format(title, str(k_tmp)))
-            pdf.savefig(fig, bbox_inches='tight')
-
-        """
-        Dwell Time
-        """
-        dwelltime = prop.calculate_dwell_time(AllPart, P_kmc, data, k, partnames, groupnames)
-        dwelltime_melt = pd.melt(dwelltime, id_vars=['group'], value_vars=[str(i) for i in np.arange(k)],
-                                     value_name="dwell_time", var_name="State")
-        plt.figure()
-        sns.boxplot(x="State", y="dwell_time", hue="group",
-                         data=dwelltime_melt, palette = palett)
-        plt.title('Dwell_Time_K-Means')
-        plt.yticks(fontsize=14)
-        pdf.savefig()
-        plt.savefig("{}_k_{}_p_{}_dwelltime.jpeg".format(model, k, PC))
-        plt.close()
-
-        plt.figure()
-        sns.boxplot(x="State", y="dwell_time", hue="group",
-                         data=dwelltime_melt, palette = palett)
-        plt.title('Dwell_Time_K-Means')
-        plt.yticks(fontsize=14)
-        plt.legend([], [], frameon=False)
-        pdf.savefig()
-        plt.savefig("{}_k_{}_p_{}_dwelltime2.jpeg".format(model, k, PC))
-        plt.close()
-
-        for k_tmp in range(k):
-            # statistics:
-            # statistics:
-            N = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[0])]
-            C = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[1])]
-            R = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[2])]
-            H = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[3])]
-            if value == 'Diag':
-                NC = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[4])]
-                fvalue, pvalue, test = stats.ANOVA_assumptions_test_Diag(R, N, C, H, NC)
-            else:
-                fvalue, pvalue, test = stats.ANOVA_assumptions_test(R, N, C, H)
-
-            tmp = dwelltime_melt.copy()
-            tmp = tmp.iloc[np.where(tmp["State"] == str(k_tmp))]
-            plt.figure()
-            sns.boxplot(x="group", y="dwell_time", data=tmp,
-                        whis=[0, 100], width=.6, palette = palett)
-            sns.stripplot(x="group", y="dwell_time", data=tmp,
-                          size=4, color=".3", linewidth=0)
-            plt.title("dwell_time state {} \n {} f-value {}, p-value {}\n".format(str(k_tmp), str(fvalue)[0:5], test, str(pvalue)[0:5]))
-            plt.yticks(fontsize=14)
-            pdf.savefig()
-            plt.savefig("{}_k_{}_p_{}_dwelltime_state{}.jpeg".format(model, k, PC, str(k_tmp)))
-            plt.close()
-
-            # POST_HOC TEST
-            dwelltime_tmp = dwelltime_melt[(dwelltime_melt["State"] == str(k_tmp))]
-
-            if test == 'kruskal':
-                toprint = posthoc_dunn(dwelltime_tmp, val_col='dwell_time', group_col='group', p_adjust='bonferroni')
-                title = "DUNN Test"
-
-            if test == 'ANOVA':
-                # perform multiple pairwise comparison (Tukey's HSD)
-                MultiComp = MultiComparison(dwelltime_tmp['dwell_time'],
-                                            dwelltime_tmp['group'])
-                toprint = pd.DataFrame(MultiComp.tukeyhsd().summary())
-                title = "TUKEY Test"
-
-            fig, ax = plt.subplots(figsize=(12, 4))
-            ax.axis('tight')
-            ax.axis('off')
-            the_table = ax.table(cellText=toprint.values, colLabels=toprint.columns, loc='center')
-            plt.title('{} clutser {}'.format(title, str(k_tmp)))
-            pdf.savefig(fig, bbox_inches='tight')
-
-        """
-            Switching Prob
-        """
-        dynamic = prop.calculate_dynamics(AllPart, P_kmc, data, partnames, groupnames)
-
-        # statistics:
-        N = dynamic['p_switch'][(dynamic["group"] == groupnames[0])]
-        C = dynamic['p_switch'][(dynamic["group"] == groupnames[1])]
-        R = dynamic['p_switch'][(dynamic["group"] == groupnames[2])]
-        H = dynamic['p_switch'][(dynamic["group"] == groupnames[3])]
-        if value == 'Diag':
-            NC = dynamic['p_switch'][(dynamic["group"] == groupnames[4])]
-            fvalue, pvalue, test = stats.ANOVA_assumptions_test_Diag(R, N, C, H, NC)
-        else:
-            fvalue, pvalue, test = stats.ANOVA_assumptions_test(R, N, C, H)
+for k_tmp in range(k):
+    # split the groups for statistics:
+    N = occurence[str(k_tmp)][(occurence["group"] == groupnames[0])]
+    C = occurence[str(k_tmp)][(occurence["group"] == groupnames[1])]
+    R = occurence[str(k_tmp)][(occurence["group"] == groupnames[2])]
+    H = occurence[str(k_tmp)][(occurence["group"] == groupnames[3])]
 
 
-        plt.figure()
-        sns.boxplot(x='p_switch', y="group", data=dynamic,
-                    whis=[0, 100], width=.6, palette = palett)
-        sns.stripplot(x='p_switch', y="group", data=dynamic,
-                      size=4, color=".3", linewidth=0)
+    H_N, H_N_p = stats.run_comparison(H,N)
+    H_R, H_R_p = stats.run_comparison(H,R)
+    H_C, H_C_p = stats.run_comparison(H,C)
 
-        plt.title("switch_prob state \n {} f-value {}, p-value {}\n".format(test, str(fvalue)[0:5], str(pvalue)[0:5]))
-        plt.yticks(fontsize=14)
-        pdf.savefig()
-        plt.savefig("{}_k_{}_p_{}_switchingprob.jpeg".format(model, k, PC))
+    p_values = [H_N_p, H_R_p, H_C_p]
+    p_adjusted = multipletests(p_values, alpha=0.05, method='bonferroni')[1]
 
-        plt.close()
+    # only for plotting reasons set nan values to 99
+    p_adjusted[np.isnan(p_adjusted)] = 99.999
 
-        # POST_HOC TEST
-        if test == 'kruskal':
-            toprint = posthoc_dunn(dynamic, val_col='p_switch', group_col='group', p_adjust='bonferroni')
-            title = "DUNN Test"
+    tmp = occurence_melt.copy()
+    tmp = tmp.iloc[np.where(tmp["State"] == str(k_tmp))]
+    plt.figure()
+    sns.boxplot(x="group", y="occurence", data=tmp,
+                whis=[0, 100], width=.6,palette = palett)
+    sns.stripplot(x="group", y="occurence", data=tmp,
+                  size=4, color=".3", linewidth=0)
+    plt.title("occurence state {}  ".format(k_tmp)+
+              "H_N: {} p = {:.3f} \n".format(H_N,p_adjusted[0])+
+              "H_R: {} p = {:.3f}  ".format(H_R,p_adjusted[1])+
+              "H_C: {} p = {:.3f}  ".format(H_C,p_adjusted[2]))
 
-        if test == 'ANOVA':
-            # perform multiple pairwise comparison (Tukey's HSD)
-            MultiComp = MultiComparison(dynamic['p_switch'],
-                                        dynamic['group'])
-            toprint = pd.DataFrame(MultiComp.tukeyhsd().summary())
-            title = "TUKEY Test"
+    plt.yticks(fontsize=14)
+    pdf.savefig()
+    if saveimg:
+        plt.savefig("k_{}_p_{}_occurence_state{}.jpeg".format(k,PC,str(k_tmp)))
+    plt.close()
 
-        fig, ax = plt.subplots(figsize=(12, 4))
-        ax.axis('tight')
-        ax.axis('off')
-        the_table = ax.table(cellText=toprint.values, colLabels=toprint.columns, loc='center')
-        plt.title('{} '.format(title))
-        pdf.savefig(fig, bbox_inches='tight')
+"""
+    4) Calculate Dwell Time
+"""
+dwelltime = prop.calculate_dwell_time(AllPart, P_kmc, data, k, partnames, groupnames)
+dwelltime_melt = pd.melt(dwelltime, id_vars=['group'], value_vars=[str(i) for i in np.arange(k)],
+                             value_name="dwell_time", var_name="State")
 
-        dynamic['Status'] = Status
-        fig = plt.figure()
-        sns.boxplot(x='p_switch', y="group", data=dynamic,
-                    whis=[0, 100], width=.6, palette=palett)
-        sns.stripplot(x='p_switch', y="group", hue='Status', data=dynamic,
-                      size=6, linewidth=0.2, palette=sns.color_palette("bright", 3))
+# plot dwell-time
+plt.figure()
+sns.boxplot(x="State", y="dwell_time", hue="group",
+                 data=dwelltime_melt, palette = palett)
+plt.title('Dwell_Time_K-Means')
+plt.yticks(fontsize=14)
+pdf.savefig()
+plt.legend([], [], frameon=False)
+pdf.savefig()
+if saveimg:
+    plt.savefig("k_{}_p_{}_dwelltime.jpeg".format(k, PC))
+plt.close()
 
-        plt.title("switch_prob state chronic_acute_points")
-        plt.yticks(fontsize=14)
-        plt.savefig("{}_k_{}_p_{}_switchingprob_chronic_acute_points.jpeg".format(model, k, PC))
-        pdf.savefig(fig, bbox_inches='tight')
-        plt.close()
+dwelltime.to_csv("dwelltime_state_{}.csv".format(mode), index=False, sep=';')
 
-        """
-            Centroid and Average
-        """
-        if model == "K-means":
-            centroids = pd.DataFrame(pca.inverse_transform(kmc.cluster_centers_))
-            centroids.columns = X.columns
+for k_tmp in range(k):
+    # statistics:
+    N = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[0])]
+    C = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[1])]
+    R = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[2])]
+    H = dwelltime[str(k_tmp)][(dwelltime["group"] == groupnames[3])]
 
-        # create average connectivity image
-        for s in range(k):
-            X_conn = np.mean(X.iloc[np.where(P_kmc == s)[0]])
-            visualize.plot_connectivity(X_conn, mode)
-            pdf.savefig()
-            plt.close()
+    H_N, H_N_p = stats.run_comparison(H,N)
+    H_R, H_R_p = stats.run_comparison(H,R)
+    H_C, H_C_p = stats.run_comparison(H,C)
 
-            if model == "K-means":
-                visualize.plot_connectivity(centroids.iloc[s], mode)
-                pdf.savefig()
-                plt.savefig("{}_cluster_{}".format(model, s))
-                plt.close()
+    p_values = [H_N_p, H_R_p, H_C_p]
+    p_adjusted = multipletests(p_values, alpha=0.05, method='bonferroni')[1]
+    # only for plotting reasons set nan values to 99
+    p_adjusted[np.isnan(p_adjusted)] = 99.999
 
-        """
-            Phase Transition
-        """
-        # individual Phase Transition
-        for group in partnames:
-            fig, ax = plt.subplots(len(AllPart["{}".format(group)]),1, figsize=(5, 50))
-            fig.suptitle('{}; \n {}_Clusters_wholeBrain_alpha'.format(group, k), size=16)
-            c = 0
-            for part in AllPart["{}".format(group)]:
-                part_cluster = P_kmc[data['ID'] == part]
-                TPM_part = prop.get_transition_matrix(part_cluster, k)
-                sns.heatmap(TPM_part, annot=True, cbar=False, ax=ax[c], fmt='.1g')
-                ax[c].set_title('Participant: '+part)
-                c +=1
-            pdf.savefig(fig)
-            plt.close()
 
-        # group averaged Phase Transition
-        visualize.plot_group_averaged_TPM(AllPart,P_kmc,Y_out,k,pdf,data,partnames,groupnames, healthy)
+    tmp = dwelltime_melt.copy()
+    tmp = tmp.iloc[np.where(tmp["State"] == str(k_tmp))]
+    plt.figure()
+    sns.boxplot(x="group", y="dwell_time", data=tmp,
+                whis=[0, 100], width=.6, palette = palett)
+    sns.stripplot(x="group", y="dwell_time", data=tmp,
+                  size=4, color=".3", linewidth=0)
+    plt.title("dwell_time state {}  ".format(k_tmp)+
+              "H_N: {} p = {:.3f}\n".format(H_N,p_adjusted[0])+
+              "H_R: {} p = {:.3f}  ".format(H_R,p_adjusted[1])+
+              "H_C: {} p = {:.3f}  ".format(H_C,p_adjusted[2]))
+    plt.yticks(fontsize=14)
+    pdf.savefig()
+    if saveimg:
+        plt.savefig("k_{}_p_{}_dwelltime_state{}.jpeg".format(k, PC, str(k_tmp)))
+    plt.close()
 
-        pd.DataFrame(np.vstack((P_kmc,data['ID']))).to_csv("mode_{}_Pkmc_K_{}_P_{}.txt".format(mode, k, PC))
+"""
+    5) Calculate Switching Prob
+"""
+dynamic = prop.calculate_dynamics(AllPart, P_kmc, data, partnames, groupnames)
 
-    pdf.close()
-    print('finished all with PC {}'.format(PC))
+dynamic.to_csv("dynamic_{}.csv".format(mode), index=False, sep=';')
+
+# statistics:
+N = dynamic['p_switch'][(dynamic["group"] == groupnames[0])]
+C = dynamic['p_switch'][(dynamic["group"] == groupnames[1])]
+R = dynamic['p_switch'][(dynamic["group"] == groupnames[2])]
+H = dynamic['p_switch'][(dynamic["group"] == groupnames[3])]
+
+H_N, H_N_p = stats.run_comparison(H, N)
+H_R, H_R_p = stats.run_comparison(H, R)
+H_C, H_C_p = stats.run_comparison(H, C)
+
+p_values = [H_N_p, H_R_p, H_C_p]
+p_adjusted = multipletests(p_values, alpha=0.05, method='bonferroni')[1]
+# only for plotting reasons set nan values to 99
+p_adjusted[np.isnan(p_adjusted)] = 99.999
+
+plt.figure()
+sns.boxplot(x='p_switch', y="group", data=dynamic,
+            whis=[0, 100], width=.6, palette = palett)
+sns.stripplot(x='p_switch', y="group", data=dynamic,
+              size=4, color=".3", linewidth=0)
+plt.title("switch_prob     " +
+          "H_N: {} p = {:.3f}\n".format(H_N,p_adjusted[0])+
+          "H_R: {} p = {:.3f}  ".format(H_R,p_adjusted[1])+
+          "H_C: {} p = {:.3f}  ".format(H_C,p_adjusted[2]))
+
+plt.yticks(fontsize=14)
+pdf.savefig()
+if saveimg:
+    plt.savefig("k_{}_p_{}_switchingprob.jpeg".format(k, PC))
+plt.close()
+
+# plot with status
+dynamic['Status'] = Status
+dynamic['Diag'] = Diag
+
+fig = plt.figure()
+sns.boxplot(x='p_switch', y="Status", data=dynamic,
+            whis=[0, 100], width=.6, palette="Spectral_r")
+if saveimg:
+    plt.savefig("k_{}_p_{}_switchingprob_state.jpeg".format(k, PC))
+sns.stripplot(x='p_switch', y="Status", hue='Diag', data=dynamic,
+              size=6, linewidth=0.2, palette=sns.color_palette("bright", 5))
+
+plt.title("switch_prob state chronic_acute_points")
+plt.yticks(fontsize=14)
+if saveimg:
+    plt.savefig("k_{}_p_{}_switchingprob_chronic_acute_points.jpeg".format(k, PC))
+pdf.savefig(fig, bbox_inches='tight')
+plt.close()
+
+"""
+    6) Calculate and plot Centroid and Average
+"""
+centroids = pd.DataFrame(pca.inverse_transform(kmc.cluster_centers_))
+centroids.columns = X.columns
+
+# create average connectivity image
+for s in range(k):
+    X_conn = np.mean(X.iloc[np.where(P_kmc == s)[0]])
+    visualize.plot_connectivity(X_conn, mode)
+    pdf.savefig()
+    plt.close()
+
+    visualize.plot_connectivity(centroids.iloc[s], mode)
+    pdf.savefig()
+    if saveimg:
+        plt.savefig("cluster_{}".format(s))
+    plt.close()
+
+"""
+    7) Calculate Phase Transition
+"""
+# individual Phase Transition
+for group in partnames:
+    fig, ax = plt.subplots(len(AllPart["{}".format(group)]),1, figsize=(5, 50))
+    fig.suptitle('{}; \n {}_Clusters_wholeBrain_alpha'.format(group, k), size=16)
+    c = 0
+    for part in AllPart["{}".format(group)]:
+        part_cluster = P_kmc[data['ID'] == part]
+        TPM_part = prop.get_transition_matrix(part_cluster, k)
+        sns.heatmap(TPM_part, annot=True, cbar=False, ax=ax[c], fmt='.1g')
+        ax[c].set_title('Participant: '+part)
+        c +=1
+    pdf.savefig(fig)
+    plt.close()
+
+# group averaged Phase Transition
+visualize.plot_group_averaged_TPM(AllPart,P_kmc,k,pdf,data,partnames,groupnames)
+
+pd.DataFrame(np.vstack((P_kmc,data['ID']))).to_csv("mode_{}_Pkmc_K_{}_P_{}.txt".format(mode, k, PC))
+
+"""
+    8) Run and plot the Correlation analysis
+"""
+dyn_DOC = dynamic[np.isin(dynamic['ID'], CRSR_ID)]
+dyn_DOC['CRSR']= CRSR_value
+dyn_DOC['TSI']= TSI
+dyn_DOC['Age']= Age
+
+# plot CRSR-transition probability
+fig = plt.figure()
+corr = pearsonr(dyn_DOC["CRSR"], dyn_DOC["p_switch"])
+sns.regplot(x='CRSR', y='p_switch', data=dyn_DOC)
+plt.title("r = "+str(corr[0])+ "\n p = "+ str(corr[1]))
+plt.xlim(-0.2,12.2)
+if saveimg:
+    plt.savefig("{}_corr_CRSR.jpeg".format(mode, k, PC))
+pdf.savefig(fig, bbox_inches='tight')
+plt.close()
+
+# plot TSI-transition probability
+fig = plt.figure()
+corr = pearsonr(dyn_DOC["TSI"], dyn_DOC["p_switch"])
+sns.regplot(x='TSI', y='p_switch', data=dyn_DOC)
+plt.title("r = "+str(corr[0])+ "\n p = "+ str(corr[1]))
+plt.xlim(0,21.5)
+if saveimg:
+    plt.savefig("{}_corr_TSI.jpeg".format(mode, k, PC))
+pdf.savefig(fig, bbox_inches='tight')
+plt.close()
+
+# plot Age-transition probability
+fig = plt.figure()
+corr = pearsonr(dyn_DOC["Age"], dyn_DOC["p_switch"])
+sns.regplot(x='Age', y='p_switch', data=dyn_DOC)
+plt.title("r = "+str(corr[0])+ "\n p = "+ str(corr[1]))
+plt.xlim(20,80)
+if saveimg:
+    plt.savefig("{}_corr_Age.jpeg".format(mode, k, PC))
+pdf.savefig(fig, bbox_inches='tight')
+plt.close()
+
+pdf.close()
 
 print('THE END')
 
-"""
-# library & dataset
-import seaborn as sns
-
-dyn_DOC = dynamic[np.isin(dynamic['ID'], CRSR_ID)]
-dyn_DOC['CRSR']= CRSR_value
-#dyn_DOC['TSI']= TSI
-
-#dyn_DOC = dyn_DOC[dyn_DOC['Status']!='C']
-
-# use the function regplot to make a scatterplot
-sns.regplot(x=dyn_DOC["CRSR"], y=dyn_DOC["p_switch"])
-plt.show()
-
-# use the function regplot to make a scatterplot
-#sns.regplot(x=dyn_DOC["TSI"], y=dyn_DOC["p_switch"])
-#plt.show()
-"""

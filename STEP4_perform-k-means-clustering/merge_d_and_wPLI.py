@@ -9,8 +9,8 @@ from statsmodels.stats.multicomp import MultiComparison
 from scikit_posthocs import posthoc_dunn
 
 
-wPLI = pd.read_csv("../STEP4_perform-k-means-clustering/mode_wpli_Pkmc_K_6_P_7.txt")
-dPLI = pd.read_csv("../STEP4_perform-k-means-clustering/mode_dpli_Pkmc_K_6_P_7.txt")
+wPLI = pd.read_csv("STEP4_perform-k-means-clustering/mode_wpli_Pkmc_K_4_P_7.txt")
+dPLI = pd.read_csv("STEP4_perform-k-means-clustering/mode_dpli_Pkmc_K_5_P_7.txt")
 
 pdf = matplotlib.backends.backend_pdf.PdfPages("Merged_wPLI_dPLI.pdf")
 
@@ -26,9 +26,11 @@ cf_matrix2 = (cf_matrix.T / np.sum(cf_matrix,axis=1))*100
 cf_matrix3 = cf_matrix.T/ np.sum(np.sum(cf_matrix,axis=1))*100
 
 fig = plt.figure()
-sns.heatmap(cf_matrix3,annot=True,cbar_kws={'format': '%.0f%%'})
+sns.heatmap(cf_matrix2,annot=True,cbar_kws={'format': '%.0f%%'})
 plt.xlabel("wPLI")
 plt.ylabel("dPLI")
+plt.show()
+
 pdf.savefig(fig)
 plt.savefig("wPLI_dPLI_confusion.jpg")
 pdf.close()
@@ -43,7 +45,7 @@ for p in Part:
     tmp = P_dPLI[np.where(dPLI.iloc[1,1:] == p)]
     nr_dPLI.append(len(np.unique(tmp)))
 
-
+min(nr_dPLI)
 np.mean(nr_dPLI)
 np.std(nr_dPLI)
 
@@ -145,4 +147,11 @@ for k_tmp in range(k):
 
 all_DOC=P_dPLI[np.isin(wPLI.iloc[1,1:],AllPart["Part_heal"], invert=True)]
 
+
 len(np.where(all_DOC == '1')[0])/len(all_DOC)*100
+
+len(np.where(P_wPLI == '3')[0])/len(P_wPLI)*100
+
+
+26.56+2.49+56.22+9.75+4.98
+54.25+11.83+4.46+29.46

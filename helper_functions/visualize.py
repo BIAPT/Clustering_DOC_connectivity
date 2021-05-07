@@ -36,22 +36,22 @@ def plot_connectivity(X_conn, mode):
 
     if mode[0] == 'w':
         colormap = matplotlib.cm.get_cmap('OrRd')
-        #norm = matplotlib.colors.Normalize(vmin=0, vmax=0.3)
+        norm = matplotlib.colors.Normalize(vmin=0, vmax=0.3)
         fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0, edge_vmax=0.3,
                                        edge_cmap=colormap, colorbar=True, edge_threshold=None,
-                                       node_color=colormap(conn_matrix.diagonal()),
+                                       node_color=colormap(norm(conn_matrix.diagonal())),
                                        display_mode='lzr')
 
     if mode[0] == 'd':
         colormap = matplotlib.cm.get_cmap('jet')
-        #norm = matplotlib.colors.Normalize(vmin=0.4, vmax=0.6)
-        fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0.4, edge_vmax=0.6,
+        norm = matplotlib.colors.Normalize(vmin=0, vmax=0.3)
+        fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0, edge_vmax=0.3,
                                        edge_cmap=colormap, colorbar=True, edge_threshold=None,
-                                       node_color=colormap(conn_matrix.diagonal()),
+                                       node_color=colormap(norm(conn_matrix.diagonal())),
                                        display_mode='lzr')
     return fig
 
-def plot_pca_results(pdf,X3,Y_out,groupnames, healthy):
+def plot_pca_results(pdf,X3,Y_out,groupnames):
     fig = plt.figure(figsize=(6, 6))
     ax = Axes3D(fig)
     n = np.where(Y_out == 0)
@@ -60,9 +60,8 @@ def plot_pca_results(pdf,X3,Y_out,groupnames, healthy):
     ax.scatter(X3[n, 0], X3[n, 1], X3[n, 2], color='green', label=groupnames[1])
     n = np.where(Y_out == 2)
     ax.scatter(X3[n, 0], X3[n, 1], X3[n, 2], color='red', label=groupnames[2])
-    if healthy == 'Yes':
-        n = np.where(Y_out == 3)
-        ax.scatter(X3[n, 0], X3[n, 1], X3[n, 2], color='orange', label=groupnames[3])
+    n = np.where(Y_out == 3)
+    ax.scatter(X3[n, 0], X3[n, 1], X3[n, 2], color='orange', label=groupnames[3])
     plt.title('PCA_allPart_wholeBrain_alpha')
     plt.legend(loc='lower right')
     pdf.savefig(fig)
@@ -78,9 +77,8 @@ def plot_pca_results(pdf,X3,Y_out,groupnames, healthy):
     ax[0].scatter(X3[n, 0], X3[n, 1], color='green', label=groupnames[1])
     n = np.where(Y_out == 2)
     ax[0].scatter(X3[n, 0], X3[n, 1], color='red', label=groupnames[2])
-    if healthy == 'Yes':
-        n = np.where(Y_out == 3)
-        ax[0].scatter(X3[n, 0], X3[n, 1], color='orange', label=groupnames[3])
+    n = np.where(Y_out == 3)
+    ax[0].scatter(X3[n, 0], X3[n, 1], color='orange', label=groupnames[3])
 
     ax[1].set_title('PC 1 and 2')
     n = np.where(Y_out == 0)
@@ -89,9 +87,8 @@ def plot_pca_results(pdf,X3,Y_out,groupnames, healthy):
     ax[1].scatter(X3[n, 1], X3[n, 2], color='green', label=groupnames[1])
     n = np.where(Y_out == 2)
     ax[1].scatter(X3[n, 1], X3[n, 2], color='red', label=groupnames[2])
-    if healthy == 'Yes':
-        n = np.where(Y_out == 3)
-        ax[1].scatter(X3[n, 1], X3[n, 2], color='orange', label=groupnames[3])
+    n = np.where(Y_out == 3)
+    ax[1].scatter(X3[n, 1], X3[n, 2], color='orange', label=groupnames[3])
 
     ax[2].set_title('PC 0 and 2')
     n = np.where(Y_out == 0)
@@ -100,16 +97,15 @@ def plot_pca_results(pdf,X3,Y_out,groupnames, healthy):
     ax[2].scatter(X3[n, 0], X3[n, 2], color='green', label=groupnames[1])
     n = np.where(Y_out == 2)
     ax[2].scatter(X3[n, 0], X3[n, 2], color='red', label=groupnames[2])
-    if healthy == 'Yes':
-        n = np.where(Y_out == 3)
-        ax[2].scatter(X3[n, 0], X3[n, 2], color='orange', label=groupnames[3])
+    n = np.where(Y_out == 3)
+    ax[2].scatter(X3[n, 0], X3[n, 2], color='orange', label=groupnames[3])
 
     plt.legend(loc='lower right')
     pdf.savefig(fig)
     plt.close()
 
 
-def plot_clustered_pca(pdf,X3,Y_out,P,k,groupnames, healthy):
+def plot_clustered_pca(pdf,X3,Y_out,P,k,groupnames):
     # visualize in 3D
     fig = plt.figure(figsize=(6,6))
     ax = Axes3D(fig)
@@ -119,9 +115,8 @@ def plot_clustered_pca(pdf,X3,Y_out,P,k,groupnames, healthy):
     ax.scatter(X3[n, 0], X3[n, 1],X3[n, 2],marker='x',c=P[n],label=groupnames[1])
     n = np.where(Y_out == 2)[0]
     ax.scatter(X3[n, 0], X3[n, 1], X3[n, 2],marker='.', c=P[n], label=groupnames[2])
-    if healthy == 'Yes':
-        n = np.where(Y_out == 3)[0]
-        ax.scatter(X3[n, 0], X3[n, 1], X3[n, 2],marker='v', c=P[n], label=groupnames[3])
+    n = np.where(Y_out == 3)[0]
+    ax.scatter(X3[n, 0], X3[n, 1], X3[n, 2],marker='v', c=P[n], label=groupnames[3])
     plt.title('{}_Clusters_allPart_wholeBrain_alpha'.format(str(k)))
     plt.legend(loc='lower right')
     pdf.savefig(fig)
@@ -137,9 +132,8 @@ def plot_clustered_pca(pdf,X3,Y_out,P,k,groupnames, healthy):
     ax[0].scatter(X3[n, 0], X3[n, 1], marker='x', c=P[n], label=groupnames[1])
     n = np.where(Y_out == 2)[0]
     ax[0].scatter(X3[n, 0], X3[n, 1], marker='.', c=P[n], label=groupnames[2])
-    if healthy == 'Yes':
-        n = np.where(Y_out == 3)[0]
-        ax[0].scatter(X3[n, 0], X3[n, 1], marker='v', c=P[n], label=groupnames[3])
+    n = np.where(Y_out == 3)[0]
+    ax[0].scatter(X3[n, 0], X3[n, 1], marker='v', c=P[n], label=groupnames[3])
 
     ax[1].set_title('PC 1 and 2')
     n = np.where(Y_out==0)[0]
@@ -148,9 +142,8 @@ def plot_clustered_pca(pdf,X3,Y_out,P,k,groupnames, healthy):
     ax[1].scatter(X3[n, 1],X3[n, 2],marker='x',c=P[n],label=groupnames[1])
     n = np.where(Y_out == 2)[0]
     ax[1].scatter(X3[n, 1], X3[n, 2],marker='.', c=P[n], label=groupnames[2])
-    if healthy == 'Yes':
-        n = np.where(Y_out == 3)[0]
-        ax[1].scatter(X3[n, 1], X3[n, 2],marker='v', c=P[n], label=groupnames[3])
+    n = np.where(Y_out == 3)[0]
+    ax[1].scatter(X3[n, 1], X3[n, 2],marker='v', c=P[n], label=groupnames[3])
 
     ax[2].set_title('PC 0 and 2')
     n = np.where(Y_out==0)[0]
@@ -159,15 +152,12 @@ def plot_clustered_pca(pdf,X3,Y_out,P,k,groupnames, healthy):
     ax[2].scatter(X3[n, 0], X3[n, 2], marker='x',c=P[n],label=groupnames[1])
     n = np.where(Y_out == 2)[0]
     ax[2].scatter(X3[n, 0], X3[n, 2], marker='.', c=P[n], label=groupnames[2])
-    if healthy == 'Yes':
-        n = np.where(Y_out == 3)[0]
-        ax[2].scatter(X3[n, 0], X3[n, 2], marker='v', c=P[n], label=groupnames[3])
+    n = np.where(Y_out == 3)[0]
+    ax[2].scatter(X3[n, 0], X3[n, 2], marker='v', c=P[n], label=groupnames[3])
 
     plt.legend(loc='lower right')
     pdf.savefig(fig)
     plt.close()
-
-
 
 
 def plot_explained_variance(pdf,pca):
@@ -176,7 +166,8 @@ def plot_explained_variance(pdf,pca):
     plt.plot(np.cumsum(pca.explained_variance_ratio_))
     plt.xlabel('number of components')
     plt.ylabel('cumulative explained variance')
-    plt.title('Explained_Variance_allPart_wholeBrain_alpha')
+    plt.title('Explained_Variance_allPart_wholeBrain_alpha \n ex_var = {}'
+              .format(np.cumsum(pca.explained_variance_ratio_)[-1]))
     pdf.savefig(fig)
     plt.close()
 
@@ -201,13 +192,12 @@ def plot_pie_and_distribution(pdf,part,part_cluster,k):
     pdf.savefig(fig)
     plt.close()
 
-def plot_group_averaged_TPM(AllPart, P, Y_out, k, pdf, data, partnames, groupnames, healthy):
+def plot_group_averaged_TPM(AllPart, P, k, pdf, data, partnames, groupnames):
 
     P_0 = np.empty((len(AllPart[partnames[0]]),k,k))
     P_1 = np.empty((len(AllPart[partnames[1]]),k,k))
     P_2 = np.empty((len(AllPart[partnames[2]]),k,k))
-    if healthy == 'Yes':
-        P_3 = np.empty((len(AllPart[partnames[3]]),k,k))
+    P_3 = np.empty((len(AllPart[partnames[3]]),k,k))
 
     for c,part in enumerate(AllPart[partnames[0]]):
         part_cluster = P[data['ID'] == part]
@@ -221,16 +211,14 @@ def plot_group_averaged_TPM(AllPart, P, Y_out, k, pdf, data, partnames, groupnam
         part_cluster = P[data['ID'] == part]
         P_2[c,:,:] = prop.get_transition_matrix(part_cluster, k)
 
-    if healthy == 'Yes':
-        for c,part in enumerate(AllPart[partnames[3]]):
-            part_cluster = P[data['ID'] == part]
-            P_3[c,:,:] = prop.get_transition_matrix(part_cluster, k)
+    for c,part in enumerate(AllPart[partnames[3]]):
+        part_cluster = P[data['ID'] == part]
+        P_3[c,:,:] = prop.get_transition_matrix(part_cluster, k)
 
     TPM_0 = np.mean(P_0,axis=0)
     TPM_1 = np.mean(P_1,axis=0)
     TPM_2 = np.mean(P_2,axis=0)
-    if healthy == 'Yes':
-        TPM_3 = np.mean(P_3,axis=0)
+    TPM_3 = np.mean(P_3,axis=0)
 
     f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(24,5))
     g1 = sns.heatmap(TPM_0, annot=True,cbar=False, ax = ax1, fmt='.1g')
@@ -239,8 +227,36 @@ def plot_group_averaged_TPM(AllPart, P, Y_out, k, pdf, data, partnames, groupnam
     g2.set_title(groupnames[1])
     g3 = sns.heatmap(TPM_2, annot=True,cbar=False, ax= ax3, fmt='.1g')
     g3.set_title(groupnames[2])
-    if healthy == 'Yes':
-        g4 = sns.heatmap(TPM_3, annot=True,cbar=False, ax= ax4, fmt='.1g')
-        g4.set_title(groupnames[3])
+    g4 = sns.heatmap(TPM_3, annot=True,cbar=False, ax= ax4, fmt='.1g')
+    g4.set_title(groupnames[3])
     pdf.savefig(f)
     plt.close()
+
+def plot_all_timeseries(pdf, AllPart,P_kmc, data, k, saveimg ):
+    # plot all participants dynamics
+    all_dyn = np.zeros((len(AllPart["Part"]), 30))
+    part_order = np.hstack((AllPart["Part_heal"], AllPart["Part_reco"], AllPart["Part_ncmd"], AllPart["Part_nonr"]))
+
+    k = 7
+
+    for i, part in enumerate(part_order):
+        part_cluster = P_kmc[data['ID'] == part]
+        all_dyn[i, :len(part_cluster)] = part_cluster + 1
+
+    my_cmap = plt.get_cmap('ocean', k)
+    my_cmap.set_under('lightgrey')
+    plt.imshow(all_dyn, cmap=my_cmap, vmin=0.001, vmax=k + .5, alpha=0.7)
+    ax = plt.gca()
+    ax.set_xticks(np.arange(0, 30, 2))
+    ax.set_yticks(np.arange(.5, len(part_order), 1))
+    ax.set_xticklabels(np.arange(1, 31, 2))
+    ax.set_yticklabels(part_order)
+    plt.colorbar()
+    plt.clim(0.5, k + 0.5)
+    pdf.savefig()
+
+    if saveimg:
+        plt.savefig("alldynamics.jpeg")
+
+    plt.close()
+
