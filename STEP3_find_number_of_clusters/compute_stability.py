@@ -26,7 +26,7 @@ analysis_param = sys.argv[1]
 
 OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_stability/"
 
-_, data, X, Y_out, _, _, _, _, _, _, _ = general.load_data(mode, frequency, step)
+_, data, X, Y_out, _, _, _, _, _, _, _, _= general.load_data(mode, frequency, step)
 
 Y_ID = data['ID']
 
