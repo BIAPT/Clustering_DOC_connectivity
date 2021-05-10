@@ -11,7 +11,7 @@ import seaborn as sns
 
 mode = 'wpli' # type of functional connectivity: can be dpli/ wpli
 frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
-step = '01' # stepsize: can be '1'
+step = '10' # stepsize: can be '01' or '10'
 
 IDS = ['WSAS05', 'WSAS19','WSAS02', 'WSAS07', 'WSAS09', 'WSAS10', 'WSAS11', 'WSAS12', 'WSAS13', 'WSAS15',
        'WSAS16', 'WSAS17', 'WSAS18', 'WSAS20', 'WSAS22', 'WSAS23',
@@ -36,9 +36,9 @@ Var_space = []
 Var_spacetime = []
 
 P_Ent_time = []
-P_Ent_space = []
 Comp_time = []
-Comp_space = []
+
+Diff_time = []
 
 for p_id in IDS:
     """
@@ -84,35 +84,61 @@ for p_id in IDS:
     Calculate Mean and Variance
     """
     Mean.append(np.mean(data_2d))
+
     Var_time.append(np.mean(np.var(data_2d,axis=0)))
+
     Var_space.append(np.mean(np.var(data_2d,axis=1)))
+
     Var_spacetime.append(np.var(data_2d))
 
     """
-        Calculate Enthropy
+        Calculate Enthropy and Complexity
     """
-    ent = []
+    ent3 = []
+    comp3= []
+    """
+    ent4 = []
+    ent5 = []
+    ent6 = []
+    ent7 = []
+    """
+
     for i in range(0,nr_features):
-        ent.append(entropy.p_entropy(data_2d[:,i]))
-    P_Ent_time.append(np.mean(ent))
-
-    ent = []
-    for i in range(0,nr_timesteps):
-        ent.append(entropy.p_entropy(data_2d[i,:]))
-    P_Ent_space.append(np.mean(ent))
+        op = entropy.ordinal_patterns(data_2d[:,i], 3, 1)
+        ent3.append(entropy.p_entropy(op))
+        comp3.append(entropy.complexity(op))
+        """
+        op = entropy.ordinal_patterns(data_2d[:,i], 4, 1)
+        ent4.append(entropy.p_entropy(op))
+        op = entropy.ordinal_patterns(data_2d[:,i], 5, 1)
+        ent5.append(entropy.p_entropy(op))
+        op = entropy.ordinal_patterns(data_2d[:,i], 6, 1)
+        ent6.append(entropy.p_entropy(op))
+        op = entropy.ordinal_patterns(data_2d[:,i], 7, 1)
+        ent7.append(entropy.p_entropy(op))
+        """
 
     """
-        Calculate Complexity
-    """
-    comp = []
-    for i in range(0,nr_features):
-        comp.append(entropy.complexity(data_2d[:,i]))
-    Comp_time.append(np.mean(comp))
+    plt.plot([np.mean(ent3),np.mean(ent4),np.mean(ent5),np.mean(ent6),np.mean(ent7)])
+    plt.xticks((1,2,3,4,5),(3,4,5,6,7))
 
-    comp = []
-    for i in range(0,nr_timesteps):
-        comp.append(entropy.complexity(data_2d[i,:]))
-    Comp_space.append(np.mean(comp))
+    plt.boxplot([ent3,ent4,ent5])
+    plt.xticks((1,2,3),(3,4,5))
+    plt.title("Permutation_Entropy  " + p_id )
+    plt.show()
+    """
+
+    P_Ent_time.append(np.mean(ent3))
+    Comp_time.append(np.mean(comp3))
+
+
+    """
+        Calculate Difference
+    """
+    # calculate the absolute difference between 2 timesteps
+    diff = np.abs(np.diff(np.transpose(data_2d)))
+    # mean them over time and space:
+    Diff_time.append(np.mean(diff))
 
 
 toplot = pd.DataFrame()
@@ -125,11 +151,11 @@ toplot['Variance time'] = Var_time
 toplot['Variance space'] = Var_space
 toplot['Variance spacetime'] = Var_spacetime
 #Entropy
-toplot['Permutation Entropy space'] = P_Ent_space
 toplot['Permutation Entropy time'] = P_Ent_time
-#Entropy
-toplot['Complexity space'] = Comp_space
+#Complexity
 toplot['Complexity time'] = Comp_time
+#Difference
+toplot['Differnce time'] = Diff_time
 
 # 0 = Non-recovered
 # 1 = CMD

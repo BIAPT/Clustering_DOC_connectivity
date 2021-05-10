@@ -44,8 +44,8 @@ def plot_connectivity(X_conn, mode):
 
     if mode[0] == 'd':
         colormap = matplotlib.cm.get_cmap('jet')
-        norm = matplotlib.colors.Normalize(vmin=0, vmax=0.3)
-        fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0, edge_vmax=0.3,
+        norm = matplotlib.colors.Normalize(vmin=0.3, vmax=0.7)
+        fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0.3, edge_vmax=0.7,
                                        edge_cmap=colormap, colorbar=True, edge_threshold=None,
                                        node_color=colormap(norm(conn_matrix.diagonal())),
                                        display_mode='lzr')
@@ -232,12 +232,17 @@ def plot_group_averaged_TPM(AllPart, P, k, pdf, data, partnames, groupnames):
     pdf.savefig(f)
     plt.close()
 
-def plot_all_timeseries(pdf, AllPart,P_kmc, data, k, saveimg ):
+def plot_all_timeseries(pdf, AllPart,P_kmc, data, step, saveimg ):
     # plot all participants dynamics
-    all_dyn = np.zeros((len(AllPart["Part"]), 30))
+    if step == "01":
+        time = 300
+    if step == "10":
+        time = 30
+
+    all_dyn = np.zeros((len(AllPart["Part"]), time))
     part_order = np.hstack((AllPart["Part_heal"], AllPart["Part_reco"], AllPart["Part_ncmd"], AllPart["Part_nonr"]))
 
-    k = 7
+    k = 4
 
     for i, part in enumerate(part_order):
         part_cluster = P_kmc[data['ID'] == part]
@@ -247,9 +252,9 @@ def plot_all_timeseries(pdf, AllPart,P_kmc, data, k, saveimg ):
     my_cmap.set_under('lightgrey')
     plt.imshow(all_dyn, cmap=my_cmap, vmin=0.001, vmax=k + .5, alpha=0.7)
     ax = plt.gca()
-    ax.set_xticks(np.arange(0, 30, 2))
+    ax.set_xticks(np.arange(0, time, 2))
     ax.set_yticks(np.arange(.5, len(part_order), 1))
-    ax.set_xticklabels(np.arange(1, 31, 2))
+    ax.set_xticklabels(np.arange(1, time+1, 2))
     ax.set_yticklabels(part_order)
     plt.colorbar()
     plt.clim(0.5, k + 0.5)

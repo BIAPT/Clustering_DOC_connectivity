@@ -8,9 +8,9 @@ import numpy as np
 
 def get_data(mode, frequency, step):
     try:
-        data = pd.read_csv("../data/new_features/33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
+        data = pd.read_csv("../data/features/33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
     except:
-        data = pd.read_csv("data/new_features/33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
+        data = pd.read_csv("data/features/33_Part_{}pli_10_{}_{}.csv".format(mode[0], step, frequency))
 
     if data.columns[0] != 'Name':
         del data[data.columns[0]]
@@ -18,8 +18,13 @@ def get_data(mode, frequency, step):
     # only use Baseline
     data = data.query("Phase=='Base'")
 
-    # only use timesteps up to 29
-    data = data[data['Time'] <= 29]
+    if step == '10':
+        # only use timesteps up to 29
+        data = data[data['Time'] <= 29]
+
+    if step == '01':
+        # only use timesteps up to 299
+        data = data[data['Time'] <= 299]
     return data
 
 def load_data(mode, frequency, step):

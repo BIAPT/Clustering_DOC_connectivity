@@ -26,12 +26,12 @@ Analysis Parameters
 """
 mode = 'dpli' # type of functional connectivity: can be dpli/ wpli
 frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
-step = '10' # stepsize: can be '1'
+step = '01' # stepsize: can be '1'
 palett = "muted" # color palette
-saveimg = True # if you want to save all images as seperate files
+saveimg = False # if you want to save all images as seperate files
 
 # number of Clusters/ Phases to explore
-k = 5   # numbser of k-clustes
+k = 4   # numbser of k-clustes
 PC = 8   # number of PC principal components
 
 # load the data
@@ -76,7 +76,7 @@ for part in AllPart["Part"]:
     visualize.plot_pie_and_distribution(pdf, part, part_cluster, k)
 
 # visualize the time-series for all participants
-visualize.plot_all_timeseries(pdf, AllPart,P_kmc, data, k, saveimg )
+visualize.plot_all_timeseries(pdf, AllPart,P_kmc, data, step, saveimg )
 
 
 """
