@@ -24,7 +24,7 @@ from statsmodels.sandbox.stats.multicomp import multipletests
 """
 Analysis Parameters
 """
-mode = 'dpli' # type of functional connectivity: can be dpli/ wpli
+mode = 'wpli' # type of functional connectivity: can be dpli/ wpli
 frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
 step = '01' # stepsize: can be '1'
 palett = "muted" # color palette
