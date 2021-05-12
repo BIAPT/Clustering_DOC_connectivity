@@ -9,19 +9,46 @@ import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf
 import seaborn as sns
 
-mode = 'wpli' # type of functional connectivity: can be dpli/ wpli
+mode = 'AEC' # type of functional connectivity: can be dpli/ wpli / AEC
 frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
-step = '10' # stepsize: can be '01' or '10'
+step = '01' # stepsize: can be '01' or '10'
+n = 5
+saveimg = True
 
-IDS = ['WSAS05', 'WSAS19','WSAS02', 'WSAS07', 'WSAS09', 'WSAS10', 'WSAS11', 'WSAS12', 'WSAS13', 'WSAS15',
-       'WSAS16', 'WSAS17', 'WSAS18', 'WSAS20', 'WSAS22', 'WSAS23',
-       'AOMW03', 'AOMW04', 'AOMW08', 'AOMW22', 'AOMW28', 'AOMW31', 'AOMW34', 'AOMW36',
-       'MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', 'MDFA15', 'MDFA17']
+AllPart ={}
+AllPart["Part"] = ['WSAS02', 'WSAS05', 'WSAS07', 'WSAS09', 'WSAS10', 'WSAS11', 'WSAS12', 'WSAS13',
+                   'WSAS15', 'WSAS16', 'WSAS17',
+                   'WSAS18', 'WSAS19', 'WSAS20', 'WSAS22', 'WSAS23',
+                   'AOMW03', 'AOMW04', 'AOMW08', 'AOMW22', 'AOMW28', 'AOMW31', 'AOMW34', 'AOMW36',
+                   'MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', 'MDFA15', 'MDFA17']
 
-outcome = ['0', '1', '2', '2', '2', '0', '0', '0', '0', '0', '0', '0',
-                        '0', '2', '0', '0',
-                        '1', '0', '1', '2', '1', '1', '1', '0',
-                        '3', '3', '3', '3', '3', '3', '3', '3', '3']
+AllPart["Part_heal"] = ['MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', 'MDFA15', 'MDFA17']
+
+AllPart["Part_nonr"] = ['WSAS05', 'WSAS10', 'WSAS11', 'WSAS12', 'WSAS13', 'WSAS15', 'WSAS16', 'WSAS17', 'WSAS18',
+                        'WSAS22', 'WSAS23', 'AOMW04', 'AOMW36']
+
+AllPart["Part_ncmd"] = ['WSAS19', 'AOMW03', 'AOMW08', 'AOMW28', 'AOMW31', 'AOMW34']
+
+AllPart["Part_reco"] = ['WSAS02', 'WSAS07', 'WSAS09', 'WSAS20', 'AOMW22']
+
+IDS = AllPart["Part"]
+outcome = np.empty(len(AllPart["Part"]))
+group = []
+
+for i,p in enumerate(AllPart["Part"]):
+    if AllPart["Part_nonr"].__contains__(p):
+        outcome[i] = 1
+        group.append("nonr")
+    if AllPart["Part_ncmd"].__contains__(p):
+        outcome[i] = 2
+        group.append("ncmd")
+    if AllPart["Part_reco"].__contains__(p):
+        outcome[i] = 0
+        group.append("reco")
+    if AllPart["Part_heal"].__contains__(p):
+        outcome[i] = 3
+        group.append("heal")
+
 
 
 INPUT_DIR = "../data/connectivity/new_{}/{}/step{}/".format(frequency, mode, step)
@@ -44,13 +71,21 @@ for p_id in IDS:
     """
     1)    IMPORT DATA
     """
-    # define path for data ON and OFF
-    data_path = INPUT_DIR + "{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
-    channels_path = INPUT_DIR + "{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
+    if mode == 'AEC':
+        # define path for data ON and OFF
+        data_path = INPUT_DIR + "AEC_{}_step{}_{}.mat".format(frequency, step, p_id)
+        channels_path = INPUT_DIR + "AEC_{}_step{}_{}_channels.mat".format(frequency, step, p_id)
+    else:
+        # define path for data ON and OFF
+        data_path = INPUT_DIR + "{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
+        channels_path = INPUT_DIR + "{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
 
     # load .mat and extract data
     data = loadmat(data_path)
-    data = data["{}pli_tofill".format(mode[0])]
+    if mode == "AEC":
+        data = data["aec_tofill".format(mode[0])]
+    else:
+        data = data["{}pli_tofill".format(mode[0])]
     channel = scipy.io.loadmat(channels_path)['channels'][0][0]
     print('Load data comlpete {}'.format(p_id))
 
@@ -89,7 +124,7 @@ for p_id in IDS:
 
     Var_space.append(np.mean(np.var(data_2d,axis=1)))
 
-    Var_spacetime.append(np.var(data_2d))
+    Var_spacetime.append(Var_time + Var_space)
 
     """
         Calculate Enthropy and Complexity
@@ -104,7 +139,7 @@ for p_id in IDS:
     """
 
     for i in range(0,nr_features):
-        op = entropy.ordinal_patterns(data_2d[:,i], 3, 1)
+        op = entropy.ordinal_patterns(data_2d[:,i], n, 1)
         ent3.append(entropy.p_entropy(op))
         comp3.append(entropy.complexity(op))
         """
@@ -144,6 +179,7 @@ for p_id in IDS:
 toplot = pd.DataFrame()
 toplot['ID'] = IDS
 toplot['outcome'] = outcome
+toplot['group'] = group
 #mean
 toplot['Mean'] = Mean
 #variance
@@ -162,13 +198,15 @@ toplot['Differnce time'] = Diff_time
 # 2 = Recovered
 # 3 = Healthy
 
-for i in toplot.columns[2:]:
+for i in toplot.columns[3:]:
     plt.figure()
     sns.boxplot(x='outcome', y=i, data=toplot)
     sns.stripplot(x='outcome', y=i, size=4, color=".3", data=toplot)
-    plt.xticks([0, 1, 2, 3], ['NonReco','CMD', 'Reco', 'Healthy'])
+    plt.xticks([0, 1, 2, 3], ['Reco','NonReco','CMD', 'Healthy'])
     plt.title(i)
     pdf.savefig()
+    if saveimg:
+        plt.savefig( i + "_.jpeg")
     plt.close()
 
 """

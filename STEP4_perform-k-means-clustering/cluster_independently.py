@@ -8,10 +8,15 @@ sys.path.append('../')
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf
 import seaborn as sns
+from sklearn.metrics import silhouette_score
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from yellowbrick.cluster import KElbowVisualizer
 
-mode = 'wpli' # type of functional connectivity: can be dpli/ wpli
+
+mode = 'dpli' # type of functional connectivity: can be dpli/ wpli
 frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
-step = '10' # stepsize: can be '01' or '10'
+step = '01' # stepsize: can be '01' or '10'
 
 IDS = ['WSAS05', 'WSAS19','WSAS02', 'WSAS07', 'WSAS09', 'WSAS10', 'WSAS11', 'WSAS12', 'WSAS13', 'WSAS15',
        'WSAS16', 'WSAS17', 'WSAS18', 'WSAS20', 'WSAS22', 'WSAS23',
@@ -26,19 +31,10 @@ outcome = ['0', '1', '2', '2', '2', '0', '0', '0', '0', '0', '0', '0',
 
 INPUT_DIR = "../data/connectivity/new_{}/{}/step{}/".format(frequency, mode, step)
 pdf = matplotlib.backends.backend_pdf.PdfPages(
-    "Variance_{}_{}_{}.pdf".format(frequency, mode, step))
+    "Independent_Cluster_{}_{}_{}.pdf".format(frequency, mode, step))
 
 # define features to extract from raw data
-Mean = []
-# variance over time, space and all on and off
-Var_time = []
-Var_space = []
-Var_spacetime = []
-
-P_Ent_time = []
-Comp_time = []
-
-Diff_time = []
+Opt_cluster = []
 
 for p_id in IDS:
     """
@@ -81,81 +77,69 @@ for p_id in IDS:
         data_2d[i] = data[i][np.triu_indices(len(channels),k=1)]
 
     """
-    Calculate Mean and Variance
+    Reduce Data PCA
     """
-    Mean.append(np.mean(data_2d))
-
-    Var_time.append(np.mean(np.var(data_2d,axis=0)))
-
-    Var_space.append(np.mean(np.var(data_2d,axis=1)))
-
-    Var_spacetime.append(np.var(data_2d))
+    pca = PCA(n_components = 10)
+    X_reduced = pca.fit_transform(X = data_2d)
 
     """
-        Calculate Enthropy and Complexity
+    Calculate Silhouette Score
     """
-    ent3 = []
-    comp3= []
-    """
-    ent4 = []
-    ent5 = []
-    ent6 = []
-    ent7 = []
-    """
+    # Instantiate the clustering model and visualizer
+    model = KMeans()
+    visualizer = KElbowVisualizer(model, k=(2, 12))
 
-    for i in range(0,nr_features):
-        op = entropy.ordinal_patterns(data_2d[:,i], 3, 1)
-        ent3.append(entropy.p_entropy(op))
-        comp3.append(entropy.complexity(op))
-        """
-        op = entropy.ordinal_patterns(data_2d[:,i], 4, 1)
-        ent4.append(entropy.p_entropy(op))
-        op = entropy.ordinal_patterns(data_2d[:,i], 5, 1)
-        ent5.append(entropy.p_entropy(op))
-        op = entropy.ordinal_patterns(data_2d[:,i], 6, 1)
-        ent6.append(entropy.p_entropy(op))
-        op = entropy.ordinal_patterns(data_2d[:,i], 7, 1)
-        ent7.append(entropy.p_entropy(op))
-        """
+    visualizer.fit(data_2d)  # Fit the data to the visualizer
+    visualizer.show()  # Finalize and render the figure
 
     """
-    plt.plot([np.mean(ent3),np.mean(ent4),np.mean(ent5),np.mean(ent6),np.mean(ent7)])
-    plt.xticks((1,2,3,4,5),(3,4,5,6,7))
+    SIL =[]
+    distortions = []
 
-    plt.boxplot([ent3,ent4,ent5])
-    plt.xticks((1,2,3),(3,4,5))
-    plt.title("Permutation_Entropy  " + p_id )
+    clusters = [2,3,4,5,6,7,8,9,10]
+    for k in clusters:
+        kmeans = KMeans(n_clusters=k, n_init=100)
+        kmeans.fit(X_reduced)  # fit the classifier
+        Y_pred = kmeans.predict(X_reduced)
+        silhouette = silhouette_score(X_reduced, Y_pred)
+        SIL.append(silhouette)
+        distortions.append(kmeans.inertia_)
+
+    plt.plot(SIL)
+    plt.plot(distortions)
     plt.show()
-    """
-
-    P_Ent_time.append(np.mean(ent3))
-    Comp_time.append(np.mean(comp3))
 
 
+    optimal1 = clusters[np.where(np.diff(SIL) == min(np.diff(SIL)))[0][0]]
+    optimal2 = clusters[np.where(np.diff(distortions) == min(np.diff(distortions)))[0][0]]
+
+    #reduce to 2 dimensions
+    pca = PCA(n_components = 2)
+    X_pca2 = pca.fit_transform(X = data_2d)
+
+    # k-means with optimal k
+    kmeans = KMeans(n_clusters=optimal, n_init=100)
+    kmeans.fit(X_reduced)  # fit the classifier
+    Y_pred = kmeans.predict(X_reduced)
+
+    for i in range(optimal):
+        n = np.where(Y_pred == i)
+        plt.scatter(X_pca2[n,0],X_pca2[n,1])
+
+    plt.title(p_id + " n_clusters: " + str(optimal))
+    pdf.savefig()
+    plt.close()
+
+    Opt_cluster.append(optimal)
     """
-        Calculate Difference
-    """
-    # calculate the absolute difference between 2 timesteps
-    diff = np.abs(np.diff(np.transpose(data_2d)))
-    # mean them over time and space:
-    Diff_time.append(np.mean(diff))
+
 
 
 toplot = pd.DataFrame()
 toplot['ID'] = IDS
 toplot['outcome'] = outcome
 #mean
-toplot['Mean'] = Mean
-#variance
-toplot['Variance time'] = Var_time
-toplot['Variance space'] = Var_space
-toplot['Variance spacetime'] = Var_spacetime
-#Entropy
-toplot['Permutation Entropy time'] = P_Ent_time
-#Complexity
-toplot['Complexity time'] = Comp_time
-#Difference
-toplot['Differnce time'] = Diff_time
+toplot['Optimal Cluster Number'] = Opt_cluster
 
 # 0 = Non-recovered
 # 1 = CMD
@@ -209,6 +193,6 @@ pdf.savefig()
 plt.close()
 """
 
-toplot.to_csv("Differentiation_{}_{}_{}.csv".format(frequency, mode, step), index=False, sep=';')
+#toplot.to_csv("Differentiation_{}_{}_{}.csv".format(frequency, mode, step), index=False, sep=';')
 
 pdf.close()

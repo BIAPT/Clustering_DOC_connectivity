@@ -24,14 +24,14 @@ from statsmodels.sandbox.stats.multicomp import multipletests
 """
 Analysis Parameters
 """
-mode = 'wpli' # type of functional connectivity: can be dpli/ wpli
+mode = 'dpli' # type of functional connectivity: can be dpli/ wpli
 frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
-step = '01' # stepsize: can be '1'
+step = '10' # stepsize: can be '01'
 palett = "muted" # color palette
-saveimg = False # if you want to save all images as seperate files
+saveimg = True # if you want to save all images as seperate files
 
 # number of Clusters/ Phases to explore
-k = 4   # numbser of k-clustes
+k = 6   # numbser of k-clustes
 PC = 8   # number of PC principal components
 
 # load the data
@@ -293,8 +293,9 @@ pd.DataFrame(np.vstack((P_kmc,data['ID']))).to_csv("mode_{}_Pkmc_K_{}_P_{}.txt".
 """
     8) Run and plot the Correlation analysis
 """
+
 dyn_DOC = dynamic[np.isin(dynamic['ID'], CRSR_ID)]
-dyn_DOC['CRSR']= CRSR_value
+dyn_DOC.loc[:, ('CRSR')]= CRSR_value
 dyn_DOC['TSI']= TSI
 dyn_DOC['Age']= Age
 

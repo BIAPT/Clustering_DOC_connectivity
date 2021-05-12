@@ -35,7 +35,7 @@ palett = "muted" # to have different colors for prognosis and diagnosis
 
 OUTPUT_DIR= ""
 
-AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames, Status, Diag, TSI = general.load_data(mode,frequency, step, healthy, value)
+AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames, Status, Diag, TSI,_ = general.load_data(mode,frequency, step)
 areas = X.columns
 
 diff = pd.DataFrame(columns=['ID','outcome','diff'])

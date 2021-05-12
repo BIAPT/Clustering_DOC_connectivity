@@ -7,7 +7,6 @@ of interest).
 It will output a pickle and csv with the features for the ML pipeline
 """
 
-
 import scipy.io
 import numpy as np
 import sys
@@ -68,8 +67,16 @@ for frequency in FREQUENCY:
                     part_in = INPUT_DIR +"/{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
                     part_channels = INPUT_DIR +"/{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
 
-                data = scipy.io.loadmat(part_in)['{}_tofill'.format(mode)]
+                data = scipy.io.loadmat(part_in)
+                if mode == "AEC":
+                    data = data["aec_tofill".format(mode[0])]
+                else:
+                    data = data["{}pli_tofill".format(mode[0])]
+
                 channel = scipy.io.loadmat(part_channels)['channels'][0][0]
+                print('Load data comlpete {}'.format(p_id))
+
+
                 print('Load data comlpete {}PLI_{}_step{}_{}_channels'.format(mode[0], frequency, step, p_id))
 
                 channels = []
