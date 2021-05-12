@@ -8,9 +8,9 @@ import numpy as np
 
 def get_data(mode, frequency, step):
     try:
-        data = pd.read_csv("../data/features/33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
+        data = pd.read_csv("../data/new_features/33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
     except:
-        data = pd.read_csv("data/features/33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
+        data = pd.read_csv("data/new_features/33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
 
     if data.columns[0] != 'Name':
         del data[data.columns[0]]
