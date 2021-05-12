@@ -83,7 +83,7 @@ for p_id in IDS:
     # load .mat and extract data
     data = loadmat(data_path)
     if mode == "AEC":
-        data = data["aec_tofill".format(mode[0])]
+        data = data["aec_tofill"]
     else:
         data = data["{}pli_tofill".format(mode[0])]
     channel = scipy.io.loadmat(channels_path)['channels'][0][0]

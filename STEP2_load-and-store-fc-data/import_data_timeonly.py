@@ -69,7 +69,7 @@ for frequency in FREQUENCY:
 
                 data = scipy.io.loadmat(part_in)
                 if mode == "AEC":
-                    data = data["aec_tofill".format(mode[0])]
+                    data = data["aec_tofill"]
                 else:
                     data = data["{}pli_tofill".format(mode[0])]
 
