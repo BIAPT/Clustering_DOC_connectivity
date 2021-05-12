@@ -236,19 +236,20 @@ def plot_all_timeseries(pdf, AllPart,P_kmc, data, step, saveimg ):
     # plot all participants dynamics
     if step == "01":
         time = 300
+        plt.figure(figsize=(37,4))
     if step == "10":
         time = 30
 
     all_dyn = np.zeros((len(AllPart["Part"]), time))
     part_order = np.hstack((AllPart["Part_heal"], AllPart["Part_reco"], AllPart["Part_ncmd"], AllPart["Part_nonr"]))
 
-    k = 4
+    k = max(P_kmc)+1
 
     for i, part in enumerate(part_order):
         part_cluster = P_kmc[data['ID'] == part]
         all_dyn[i, :len(part_cluster)] = part_cluster + 1
 
-    my_cmap = plt.get_cmap('ocean', k)
+    my_cmap = plt.get_cmap('viridis', k)
     my_cmap.set_under('lightgrey')
     plt.imshow(all_dyn, cmap=my_cmap, vmin=0.001, vmax=k + .5, alpha=0.7)
     ax = plt.gca()
