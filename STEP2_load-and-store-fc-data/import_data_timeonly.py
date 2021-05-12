@@ -16,10 +16,11 @@ sys.path.append('../')
 from helper_functions import extract_features
 
 # Loop over these parameters
-FREQUENCY = ["alpha", "theta", "delta"]
-#FREQUENCY = ["alpha"]
+#FREQUENCY = ["alpha", "theta", "delta"]
+FREQUENCY = ["alpha"]
 STEP = ["10", "01"]
-MODE = ["wpli", "dpli"]
+#MODE = ["wpli", "dpli", "AEC"]
+MODE = ["AEC"]
 
 P_IDS = ['MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', 'MDFA15', 'MDFA17',
          'WSAS02', 'WSAS05', 'WSAS07', 'WSAS09', 'WSAS10', 'WSAS11', 'WSAS12', 'WSAS13','WSAS15','WSAS16','WSAS17',
@@ -60,8 +61,12 @@ for frequency in FREQUENCY:
             df_wpli_final = pd.DataFrame()
 
             for p_id in P_IDS:
-                part_in = INPUT_DIR +"/{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
-                part_channels = INPUT_DIR +"/{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
+                if mode == "AEC":
+                    part_in = INPUT_DIR +"/AEC_{}_step{}_{}.mat".format(frequency, step, p_id)
+                    part_channels = INPUT_DIR +"/AEC_{}_step{}_{}_channels.mat".format(frequency, step, p_id)
+                else:
+                    part_in = INPUT_DIR +"/{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
+                    part_channels = INPUT_DIR +"/{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
 
                 data = scipy.io.loadmat(part_in)['{}_tofill'.format(mode)]
                 channel = scipy.io.loadmat(part_channels)['channels'][0][0]
