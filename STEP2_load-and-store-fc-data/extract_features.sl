@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=run_all_models
+#SBATCH --job-name=extract-features
 #SBATCH --account=def-sblain
 #SBATCH --mem=90000      # increase as needed
-#SBATCH --time=0-03:00:00
+#SBATCH --time=0-01:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=20
@@ -18,4 +18,5 @@ pip install --no-index scikit-learn
 pip install --no-index pandas
 pip install --no-index matplotlib
 pip install --no-index seaborn
+pip install --no-index scipy
 python -u import_data_timeonly.py
