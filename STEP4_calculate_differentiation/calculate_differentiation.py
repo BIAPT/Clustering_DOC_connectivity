@@ -16,6 +16,7 @@ n = 5
 saveimg = True
 
 AllPart ={}
+
 AllPart["Part"] = ['WSAS02', 'WSAS05', 'WSAS07', 'WSAS09', 'WSAS10', 'WSAS11', 'WSAS12', 'WSAS13',
                    'WSAS15', 'WSAS16', 'WSAS17',
                    'WSAS18', 'WSAS19', 'WSAS20', 'WSAS22', 'WSAS23',
@@ -32,21 +33,21 @@ AllPart["Part_ncmd"] = ['WSAS19', 'AOMW03', 'AOMW08', 'AOMW28', 'AOMW31', 'AOMW3
 AllPart["Part_reco"] = ['WSAS02', 'WSAS07', 'WSAS09', 'WSAS20', 'AOMW22']
 
 IDS = AllPart["Part"]
-outcome = np.empty(len(AllPart["Part"]))
+outcome = []
 group = []
 
 for i,p in enumerate(AllPart["Part"]):
     if AllPart["Part_nonr"].__contains__(p):
-        outcome[i] = 1
+        outcome.append(1)
         group.append("nonr")
     if AllPart["Part_ncmd"].__contains__(p):
-        outcome[i] = 2
+        outcome.append(2)
         group.append("ncmd")
     if AllPart["Part_reco"].__contains__(p):
-        outcome[i] = 0
+        outcome.append(0)
         group.append("reco")
     if AllPart["Part_heal"].__contains__(p):
-        outcome[i] = 3
+        outcome.append(3)
         group.append("heal")
 
 
@@ -120,11 +121,13 @@ for p_id in IDS:
     """
     Mean.append(np.mean(data_2d))
 
-    Var_time.append(np.mean(np.var(data_2d,axis=0)))
+    var_time = np.mean(np.var(data_2d,axis=0))
+    Var_time.append(var_time)
 
-    Var_space.append(np.mean(np.var(data_2d,axis=1)))
+    var_space = np.mean(np.var(data_2d,axis=1))
+    Var_space.append(var_space)
 
-    Var_spacetime.append(Var_time + Var_space)
+    Var_spacetime.append(var_time + var_space)
 
     """
         Calculate Enthropy and Complexity
@@ -200,13 +203,13 @@ toplot['Differnce time'] = Diff_time
 
 for i in toplot.columns[3:]:
     plt.figure()
-    sns.boxplot(x='outcome', y=i, data=toplot)
-    sns.stripplot(x='outcome', y=i, size=4, color=".3", data=toplot)
+    sns.boxplot(x='outcome', y = i, data=toplot)
+    sns.stripplot(x='outcome', y = i, size=4, color=".3", data=toplot)
     plt.xticks([0, 1, 2, 3], ['Reco','NonReco','CMD', 'Healthy'])
     plt.title(i)
     pdf.savefig()
     if saveimg:
-        plt.savefig( i + "_.jpeg")
+        plt.savefig( i + ".jpeg")
     plt.close()
 
 """

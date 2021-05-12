@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # We assume running this from the script directory
-MODES=("dpli" "wpli")
+#MODES=("dpli" "wpli" "AEC")
+MODES=("AEC")
 #FREQUENCIES=("alpha" "theta" "delta")
 STEPS=("01" "10")
 FREQUENCIES=("alpha")
-HEALTHY=("Yes")
-REP=50
+REP=2
 
 for mode in ${MODES[@]}; do
     for frequency in ${FREQUENCIES[@]}; do
