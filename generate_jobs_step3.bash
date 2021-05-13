@@ -4,9 +4,10 @@
 #MODES=("dpli" "wpli" "AEC")
 MODES=("AEC")
 #FREQUENCIES=("alpha" "theta" "delta")
-STEPS=("01" "10")
+#STEPS=("01" "10")
+STEPS=("01")
 FREQUENCIES=("alpha")
-REP=2
+REP=50
 
 for mode in ${MODES[@]}; do
     for frequency in ${FREQUENCIES[@]}; do
