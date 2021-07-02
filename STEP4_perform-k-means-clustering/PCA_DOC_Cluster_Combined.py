@@ -24,9 +24,9 @@ from statsmodels.sandbox.stats.multicomp import multipletests
 """
 Analysis Parameters
 """
-mode = 'dpli' # type of functional connectivity: can be dpli/ wpli
+mode = 'AEC' # type of functional connectivity: can be dpli/ wpli
 frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
-step = '10' # stepsize: can be '01'
+step = '01' # stepsize: can be '01'
 palett = "muted" # color palette
 saveimg = True # if you want to save all images as seperate files
 

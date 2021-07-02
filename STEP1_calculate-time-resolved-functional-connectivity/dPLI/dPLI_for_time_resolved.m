@@ -72,7 +72,7 @@ for s = 1:length(step_sizes)
         
         % calculate dPLI with NEUROALGO
         %the following part is the same content as in this function: 
-        %result_dpli = na_dpli(recording, frequency_band, window_size, step_size, number_surrogate, p_value);
+        %result_dpli = na_dpli_corrected(recording, frequency_band, window_size, step_size, number_surrogate, p_value);
         % but here, it is parralelized
         
         %% Getting the configuration
@@ -104,7 +104,7 @@ for s = 1:length(step_sizes)
         parfor win_i = 1:number_window
             disp(strcat("dpli at window: ",string(win_i)," of ", string(number_window))); 
             segment_data = squeeze(windowed_data(win_i,:,:));
-            dpli_tofill(win_i,:,:) = dpli(segment_data, number_surrogates, p_value);
+            dpli_tofill(win_i,:,:) = dpli_corrected(segment_data, number_surrogates, p_value);
         end
         
         

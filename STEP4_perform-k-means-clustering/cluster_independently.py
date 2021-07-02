@@ -14,7 +14,7 @@ from sklearn.decomposition import PCA
 from yellowbrick.cluster import KElbowVisualizer
 
 
-mode = 'dpli' # type of functional connectivity: can be dpli/ wpli
+mode = 'AEC' # type of functional connectivity: can be dpli/ wpli
 frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
 step = '01' # stepsize: can be '01' or '10'
 
@@ -40,13 +40,21 @@ for p_id in IDS:
     """
     1)    IMPORT DATA
     """
-    # define path for data ON and OFF
-    data_path = INPUT_DIR + "{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
-    channels_path = INPUT_DIR + "{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
+    if mode == 'AEC':
+        # define path for data ON and OFF
+        data_path = INPUT_DIR + "AEC_{}_step{}_{}.mat".format(frequency, step, p_id)
+        channels_path = INPUT_DIR + "AEC_{}_step{}_{}_channels.mat".format(frequency, step, p_id)
+    else:
+        # define path for data ON and OFF
+        data_path = INPUT_DIR + "{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
+        channels_path = INPUT_DIR + "{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
 
-    # load .mat and extract data
+        # load .mat and extract data
     data = loadmat(data_path)
-    data = data["{}pli_tofill".format(mode[0])]
+    if mode == "AEC":
+        data = data["aec_tofill"]
+    else:
+        data = data["{}pli_tofill".format(mode[0])]
     channel = scipy.io.loadmat(channels_path)['channels'][0][0]
     print('Load data comlpete {}'.format(p_id))
 
@@ -86,13 +94,13 @@ for p_id in IDS:
     Calculate Silhouette Score
     """
     # Instantiate the clustering model and visualizer
-    model = KMeans()
-    visualizer = KElbowVisualizer(model, k=(2, 12))
+    #model = KMeans()
+    #visualizer = KElbowVisualizer(model, k=(2, 12))
 
-    visualizer.fit(data_2d)  # Fit the data to the visualizer
-    visualizer.show()  # Finalize and render the figure
+    #visualizer.fit(data_2d)  # Fit the data to the visualizer
+    #visualizer.show()  # Finalize and render the figure
 
-    """
+
     SIL =[]
     distortions = []
 
@@ -105,13 +113,12 @@ for p_id in IDS:
         SIL.append(silhouette)
         distortions.append(kmeans.inertia_)
 
-    plt.plot(SIL)
-    plt.plot(distortions)
-    plt.show()
+    #plt.plot(SIL)
+    #plt.plot(distortions)
+    #plt.show()
 
 
-    optimal1 = clusters[np.where(np.diff(SIL) == min(np.diff(SIL)))[0][0]]
-    optimal2 = clusters[np.where(np.diff(distortions) == min(np.diff(distortions)))[0][0]]
+    optimal = clusters[np.where(np.diff(SIL) == min(np.diff(SIL)))[0][0]]
 
     #reduce to 2 dimensions
     pca = PCA(n_components = 2)
@@ -131,7 +138,7 @@ for p_id in IDS:
     plt.close()
 
     Opt_cluster.append(optimal)
-    """
+
 
 
 

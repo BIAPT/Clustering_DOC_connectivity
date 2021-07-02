@@ -10,7 +10,7 @@ import matplotlib.backends.backend_pdf
 import seaborn as sns
 
 mode = 'AEC' # type of functional connectivity: can be dpli/ wpli / AEC
-frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
+frequency = 'theta' # frequency band: can be alpha/ theta/ delta
 step = '01' # stepsize: can be '01' or '10'
 n = 5
 saveimg = True

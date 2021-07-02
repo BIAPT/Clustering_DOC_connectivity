@@ -11,8 +11,8 @@ import matplotlib.backends.backend_pdf
 import numpy as np
 import pandas as pd
 
-mode = ["dpli", "wpli"]
-steps = ["10","01"]
+mode = ["dpli", "wpli", "AEC"]
+steps = ["01"]
 frequency = ["alpha"]
 #frequency = ["alpha", "theta", "delta"]
 Rep = 50
