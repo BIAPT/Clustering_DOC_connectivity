@@ -1,0 +1,24 @@
+#!/bin/sh
+PARALLEL_SERVER_DECODE_FUNCTION=parallel.cluster.generic.communicatingDecodeFcn
+export PARALLEL_SERVER_DECODE_FUNCTION
+PARALLEL_SERVER_STORAGE_CONSTRUCTOR=makeFileStorageObject
+export PARALLEL_SERVER_STORAGE_CONSTRUCTOR
+PARALLEL_SERVER_JOB_LOCATION=Job1
+export PARALLEL_SERVER_JOB_LOCATION
+PARALLEL_SERVER_MATLAB_EXE=/cvmfs/restricted.computecanada.ca/easybuild/software/2017/Core/matlab/2020a/bin/worker
+export PARALLEL_SERVER_MATLAB_EXE
+PARALLEL_SERVER_MATLAB_ARGS=-parallel
+export PARALLEL_SERVER_MATLAB_ARGS
+PARALLEL_SERVER_DEBUG=false
+export PARALLEL_SERVER_DEBUG
+MLM_WEB_LICENSE=false
+export MLM_WEB_LICENSE
+PARALLEL_SERVER_STORAGE_LOCATION=/scratch/lotte/R2020a
+export PARALLEL_SERVER_STORAGE_LOCATION
+PARALLEL_SERVER_CMR=/cvmfs/restricted.computecanada.ca/easybuild/software/2017/Core/matlab/2020a
+export PARALLEL_SERVER_CMR
+PARALLEL_SERVER_TOTAL_TASKS=40
+export PARALLEL_SERVER_TOTAL_TASKS
+PARALLEL_SERVER_NUM_THREADS=1
+export PARALLEL_SERVER_NUM_THREADS
+sbatch --job-name=Job1 --output='/scratch/lotte/R2020a/Job1/Job1.log' --account=def-sblain --nodes=1 --ntasks-per-node=1 --cpus-per-task=40 --mem-per-cpu=9000 --time=06:00:00 --mail-user=q2h3s6p4k0e9o7a5@biaptlab.slack.com --mail-type=ALL --job-name=make-dPLI '/scratch/lotte/R2020a/Job1/communicatingJobWrapper.sh'

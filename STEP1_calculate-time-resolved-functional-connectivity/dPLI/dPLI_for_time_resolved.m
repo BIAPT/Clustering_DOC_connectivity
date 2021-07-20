@@ -3,9 +3,9 @@
 % The matrices will be generated twice: once with overlapping and
 % once with non-overlapping windows in the alpha bandwidth.  
 
-%FREQUENCY = "alpha";
+FREQUENCY = "alpha";
 %FREQUENCY = "theta";
-FREQUENCY = "delta";
+%FREQUENCY = "delta";
 
 
 % Remote Source Setup
