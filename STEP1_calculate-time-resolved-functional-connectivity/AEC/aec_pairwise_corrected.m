@@ -40,7 +40,7 @@ function [aec] = aec_pairwise_corrected(data, num_channels, cut_amount)
             env = abs(ht);
             c = corr(env);
             
-            aec(region_i,region_j) = c(1,2);
+            aec(region_i,region_j) = abs(c(1,2));
         end
     end
     

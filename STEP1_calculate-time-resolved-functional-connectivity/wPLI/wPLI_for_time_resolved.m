@@ -9,7 +9,6 @@ P_IDS = info.Var1;
 
 FREQUENCIES = ["alpha","theta","delta"];
 
-
 for f = 1:length(FREQUENCIES) 
     FREQUENCY = FREQUENCIES{f};
     % Remote Source Setup
