@@ -14,10 +14,14 @@ for f = 1:length(FREQUENCIES)
 
     % Remote Source Setup
     %
+    %INPUT_DIR = 'C:/Users/User/Desktop/test';
+    %OUTPUT_DIR ='C:/Users/User/Desktop/test/';
+    
     INPUT_DIR = '/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/DATA_BASELINE_5min_250Hz';
     OUTPUT_DIR = strcat("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/", FREQUENCY, "/aec/");
     NEUROALGO_PATH = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/NeuroAlgo";
     addpath(genpath(NEUROALGO_PATH)); % Add NA library to our path so that we can use it
+
 
     %% AEC Parameters:
     if FREQUENCY == "alpha"
@@ -92,7 +96,8 @@ for f = 1:length(FREQUENCIES)
                 segment_data = squeeze(windowed_data(win_i,:,:));
                 aec_tofill(win_i,:,:) = aec_pairwise_corrected(segment_data, num_channels, cut_amount);
             end
-
+            
+            aec_tofill = (aec_tofill + permute(aec_tofill,([1,3,2])))/2;
             channels = struct2cell(result.metadata.channels_location);
 
             %% Save AEC

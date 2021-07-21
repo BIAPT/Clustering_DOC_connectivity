@@ -1,7 +1,7 @@
 #!/bin/bash -l
 #SBATCH --job-name=AEC-time-resolved
 #SBATCH --account=def-sblain # adjust this to match the accounting group you are using to submit jobs
-#SBATCH --time=0-03:00:00        # adjust this to match the walltime of your job (D-HH:MM:SS)
+#SBATCH --time=0-01:00:00        # adjust this to match the walltime of your job (D-HH:MM:SS)
 #SBATCH --nodes=1     
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=40      # adjust this if you are using parallel commands
@@ -10,7 +10,7 @@
 #SBATCH --mail-type=ALL
 
 # Choose a version of MATLAB by loading a module:
-module load matlab/2018a
+module load matlab
 
 # Create temporary job info location
 mkdir -p /scratch/$USER/$SLURM_JOB_ID
