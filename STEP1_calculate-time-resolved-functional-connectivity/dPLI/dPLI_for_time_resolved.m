@@ -5,7 +5,7 @@
 
 % Load the Paricipant IDS: 
 info = readtable('/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/DOC_Cluster_participants.txt');
-P_IDS = info.Var1;
+P_IDS = info.Patient_ID;
 
 FREQUENCIES = ["alpha","theta","delta"];
 

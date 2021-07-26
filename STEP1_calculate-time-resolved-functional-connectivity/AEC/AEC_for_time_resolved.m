@@ -5,7 +5,7 @@
 
 % Load the Paricipant IDS: 
 info = readtable('/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/DOC_Cluster_participants.txt');
-P_IDS = info.Var1;
+P_IDS = info.Patient_ID;
 
 FREQUENCIES = ["alpha","theta","delta"];
 
@@ -49,7 +49,7 @@ for f = 1:length(FREQUENCIES)
         step = step_sizes{s};
         for p = 1:length(P_IDS)
             p_id = P_IDS{p};
-
+            
             fprintf("Analyzing AEC of participant '%s' with stepsize '%s' \n", p_id, step);
 
             participant_in = strcat(p_id, '_Base_5min.set');
