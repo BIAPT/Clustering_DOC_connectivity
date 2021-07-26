@@ -18,7 +18,7 @@ classdef ccSBATCH
         memPerCPU = '9000'
 
         % Requested walltime
-        walltime = '05:00:00'
+        walltime = '07:00:00'
 
         % You may use otherOptions to append a string to the qsub command
         % e.g.

@@ -1,7 +1,7 @@
 """
 written by CHARLOTTE MASCHKE: DOC Clustering 2020/2021
 This code contains a list of participants and a list of electrodes which belong to one areas of interest
-It will go through the individual wPLI and dPLI files and select the features (functional connectivity for the regions
+It will go through the individual wPLI and dPLI and aec files and select the features (functional connectivity for the regions
 of interest).
 
 It will output a pickle and csv with the features for the ML pipeline
@@ -13,19 +13,20 @@ import sys
 import pandas as pd
 sys.path.append('../')
 from helper_functions import extract_features
+import os
 
 # Loop over these parameters
-#FREQUENCY = ["alpha", "theta", "delta"]
-FREQUENCY = ["alpha"]
+FREQUENCY = ["alpha", "theta", "delta"]
 STEP = ["10", "01"]
-#MODE = ["wpli", "dpli", "AEC"]
-MODE = ["AEC"]
+MODE = ["wpli", "dpli", "aec"]
 
-P_IDS = ['MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', 'MDFA15', 'MDFA17',
-         'WSAS02', 'WSAS05', 'WSAS07', 'WSAS09', 'WSAS10', 'WSAS11', 'WSAS12', 'WSAS13','WSAS15','WSAS16','WSAS17',
-         'WSAS18', 'WSAS19', 'WSAS20', 'WSAS22','WSAS23',
-         'AOMW03', 'AOMW04', 'AOMW08', 'AOMW22', 'AOMW28', 'AOMW31', 'AOMW34', 'AOMW36']
+# load participant IDS and information from txt file
+info = pd.read_table("data/DOC_Cluster_participants.txt")
+P_IDS = info['Patient_ID']
 
+# This is a list of regions of interest: Every region consist of 2 areas
+# L: Left, R: Right,
+# F: Frontal, C: Central, P: Parietal, O: Occipital, T: Temporal
 ROI = ['LF_LC', 'LF_LP', 'LF_LO', 'LF_LT',
        'LT_LO', 'LT_LC', 'LT_LP',
        'LP_LO', 'LP_LC',
@@ -53,38 +54,34 @@ ROI = ['LF_LC', 'LF_LP', 'LF_LO', 'LF_LT',
 for frequency in FREQUENCY:
     for step in STEP:
         for mode in MODE:
-            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/new_features/"
-            INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_{}/{}/step{}"\
+            # define input and output dir
+            OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/features/"
+            INPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/{}/{}/step{}"\
                 .format(frequency, mode, step)
             # empty dataframe for all participants
-            df_wpli_final = pd.DataFrame()
+            df_fc_final = pd.DataFrame()
 
             for p_id in P_IDS:
-                if mode == "AEC":
-                    part_in = INPUT_DIR +"/AEC_{}_step{}_{}.mat".format(frequency, step, p_id)
-                    part_channels = INPUT_DIR +"/AEC_{}_step{}_{}_channels.mat".format(frequency, step, p_id)
-                else:
-                    part_in = INPUT_DIR +"/{}PLI_{}_step{}_{}.mat".format(mode[0], frequency, step, p_id)
-                    part_channels = INPUT_DIR +"/{}PLI_{}_step{}_{}_channels.mat".format(mode[0], frequency, step, p_id)
+                ## LOAD FC and channel data
+                part_in = INPUT_DIR +"/{}_{}_step{}_{}.mat".format(mode, frequency, step, p_id)
+                part_channels = INPUT_DIR +"/{}_{}_step{}_{}_channels.mat".format(mode, frequency, step, p_id)
 
+                # extract data
                 data = scipy.io.loadmat(part_in)
-                if mode == "AEC":
-                    data = data["aec_tofill"]
-                else:
-                    data = data["{}pli_tofill".format(mode[0])]
-
+                data = data["{}_tofill".format(mode)]
                 channel = scipy.io.loadmat(part_channels)['channels'][0][0]
-                print('Load data comlpete {}'.format(p_id))
-
-
-                print('Load data comlpete {}PLI_{}_step{}_{}_channels'.format(mode[0], frequency, step, p_id))
-
+                # extract channels from weird format
                 channels = []
                 for a in range(0,len(channel)):
                     channels.append(channel[a][0])
                 channels = np.array(channels)
 
+                # loading data finished
+                print('Load data comlpete {}_{}_step{}_{}_channels'.format(mode, frequency, step, p_id))
+
                 # change the channel notation from 'Fp2 to E9'
+                # do not change for WSAS 02 because this one has a different notation
+                # WSAS 02 is therefore a special case below too
                 if p_id != 'WSAS02':
                     channels[np.where(channels == 'Fp2')] = 'E9'
                     channels[np.where(channels == 'Fz')] = 'E11'
@@ -109,7 +106,6 @@ for frequency in FREQUENCY:
                     channels[np.where(channels == 'F4')] = 'E124'
 
                 # create empty dataframe to fill
-                # name wpli but can also contain dpli, depending on mode
                 ID = p_id[3:6]
 
                 names = ROI.copy()
@@ -120,17 +116,22 @@ for frequency in FREQUENCY:
 
                 State = "Base"
 
+                # create empty frame to collect missing electrodes
                 missingel = []
+                # define length of FC (nr. of windows) in this participant
                 time_steps=data.shape[0]
 
-                df_wpli = pd.DataFrame(np.zeros((time_steps,len(names))))
+                # create empty dataframe for functional connectivity
+                df_fc = pd.DataFrame(np.zeros((time_steps,len(names))))
+                df_fc.columns = names
 
                 name = "{}_Base".format(p_id)
-                df_wpli.iloc[:,0] = name
-                df_wpli.iloc[:,1] = ID
-                df_wpli.iloc[:,2] = State
+                df_fc['Name'] = name
+                df_fc['ID'] = ID
+                df_fc['Phase'] = State
 
                 # initialize a dict of regions and referring electrodes
+                # this is used to extract and average FC for the different Regions
                 regions = {}
 
                 regions["LF"] = ['E15', 'E32', 'E22', 'E16', 'E18', 'E23', 'E26', 'E11', 'E19', 'E24', 'E27', 'E33',
@@ -149,7 +150,8 @@ for frequency in FREQUENCY:
                 regions["RO"] = ['E75', 'E83', 'E90', 'E95', 'E82', 'E89']
                 regions["RT"] = ['E121', 'E114', 'E115', 'E109', 'E102', 'E108', 'E101', 'E100']
 
-
+                # WSAS 02 is a special case because we used a different system.
+                # Therefore we have the areas defined with a different electrode list
                 if p_id == 'WSAS02':
 
                     regions = {}
@@ -165,28 +167,35 @@ for frequency in FREQUENCY:
                     regions['RO'] = ['POz', 'PO4', 'PO8', 'Oz', 'O2']
                     regions['RT'] = ['FT8', 'T8', 'TP8']
 
+                # HERE we start extracting the data and averaging over regions
                 for t in range(0, time_steps):
-                    df_wpli.iloc[t, 3] = t
-                    i = 4   # Position in DataFrame: 0-3 are 'Name','ID','Phase','Time'
+                    df_fc['Time'] = t
 
                     for r in ROI:
                         r1=r[0:2]
                         r2=r[3:5]
-
                         conn, missing = extract_features.extract_single_features(X_step=data[t].copy(), channels=channels,
                                                                       selection_1=regions[r1], selection_2=regions[r2],
-                                                                      time=t, mode = mode)
-                        missingel.extend(missing)
-                        df_wpli.iloc[t, i] = conn
+                                                                      time=t)
+                        # fill in the FC dataframe
+                        df_fc.loc[t,r] = conn
+                        if t == 1:
+                            missingel.extend(missing)
 
-                        i += 1
+                # save the participants missing electrodes
+                # create new dir if necessary
+                if not os.path.exists(OUTPUT_DIR +"missing_el"):
+                    os.makedirs(OUTPUT_DIR +"missing_el")
+                with open(OUTPUT_DIR +"missing_el/missing_el_{}.txt".format(p_id), "w") as output:
+                    output.write(str(missingel))
 
-                df_wpli_final = df_wpli_final.append(df_wpli)
+                # append participants FC in global FC frame
+                df_fc_final = df_fc_final.append(df_fc)
                 print("Participant" + name + "   finished")
                 print("missing electrodes: " + str(list(set(missingel))))
 
-            df_wpli_final.columns = names
-
-            df_wpli_final.to_pickle(OUTPUT_DIR + "33_Part_{}_10_{}_{}.pickle".format(mode, step, frequency), protocol=4)
-            df_wpli_final.to_csv(OUTPUT_DIR + "33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
+            df_fc_final.columns = names
+            # save it as piclke and csv
+            df_fc_final.to_pickle(OUTPUT_DIR + "33_Part_{}_10_{}_{}.pickle".format(mode, step, frequency), protocol=4)
+            df_fc_final.to_csv(OUTPUT_DIR + "33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
 
