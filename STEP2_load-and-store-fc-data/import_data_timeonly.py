@@ -169,7 +169,7 @@ for frequency in FREQUENCY:
 
                 # HERE we start extracting the data and averaging over regions
                 for t in range(0, time_steps):
-                    df_fc['Time'] = t
+                    df_fc.loc[t,'Time'] = t
 
                     for r in ROI:
                         r1=r[0:2]
