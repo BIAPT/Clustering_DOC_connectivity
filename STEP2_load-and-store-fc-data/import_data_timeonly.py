@@ -106,7 +106,7 @@ for frequency in FREQUENCY:
                     channels[np.where(channels == 'F4')] = 'E124'
 
                 # create empty dataframe to fill
-                ID = p_id[3:6]
+                ID = p_id[3:7]
 
                 names = ROI.copy()
                 names.insert(0, 'Name')
@@ -196,6 +196,7 @@ for frequency in FREQUENCY:
 
             df_fc_final.columns = names
             # save it as piclke and csv
-            df_fc_final.to_pickle(OUTPUT_DIR + "33_Part_{}_10_{}_{}.pickle".format(mode, step, frequency), protocol=4)
-            df_fc_final.to_csv(OUTPUT_DIR + "33_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
+            nr_part = len(P_IDS)
+            df_fc_final.to_pickle(OUTPUT_DIR + "{}_Part_{}_10_{}_{}.pickle".format(nr_part, mode, step, frequency), protocol=4)
+            df_fc_final.to_csv(OUTPUT_DIR + "{}_Part_{}_10_{}_{}.csv".format(nr_part, mode, step, frequency))
 
