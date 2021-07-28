@@ -21,7 +21,7 @@ STEP = ["10", "01"]
 MODE = ["wpli", "dpli", "aec"]
 
 # load participant IDS and information from txt file
-info = pd.read_table("data/DOC_Cluster_participants.txt")
+info = pd.read_table("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/DOC_Cluster_participants.txt")
 P_IDS = info['Patient_ID']
 
 # This is a list of regions of interest: Every region consist of 2 areas
