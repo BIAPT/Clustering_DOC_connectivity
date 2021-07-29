@@ -34,14 +34,15 @@ def plot_connectivity(X_conn, mode):
 
     conn_matrix = np.array(conn_tmp)
 
-    if mode[0] == 'w':
-        colormap = matplotlib.cm.get_cmap('OrRd')
-        norm = matplotlib.colors.Normalize(vmin=0, vmax=0.3)
-        fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0, edge_vmax=0.3,
+    if mode == 'wpli':
+        #colormap = matplotlib.cm.get_cmap('OrRd')
+        colormap = matplotlib.cm.get_cmap('jet')
+        norm = matplotlib.colors.Normalize(vmin=0, vmax=0.25)
+        fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0, edge_vmax=0.25,
                                        edge_cmap=colormap, colorbar=True, edge_threshold=None,
                                        node_color=colormap(norm(conn_matrix.diagonal())),
                                        display_mode='lzr')
-    if mode[0] == 'A':
+    if mode == 'aec':
         colormap = matplotlib.cm.get_cmap('OrRd')
         norm = matplotlib.colors.Normalize(vmin=0, vmax=0.3)
         fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0, edge_vmax=0.3,
@@ -49,7 +50,7 @@ def plot_connectivity(X_conn, mode):
                                        node_color=colormap(norm(conn_matrix.diagonal())),
                                        display_mode='lzr')
 
-    if mode[0] == 'd':
+    if mode == 'dpli':
         colormap = matplotlib.cm.get_cmap('jet')
         norm = matplotlib.colors.Normalize(vmin=0.3, vmax=0.7)
         fig = plotting.plot_connectome(conn_matrix, node_coords=coords, edge_vmin=0.3, edge_vmax=0.7,

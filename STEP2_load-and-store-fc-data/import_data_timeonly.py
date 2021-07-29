@@ -23,8 +23,6 @@ MODE = ["wpli", "dpli"]
 # load participant IDS and information from txt file
 info = pd.read_table("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/DOC_Cluster_participants.txt")
 P_IDS = info['Patient_ID']
-print(P_IDS)
-print(info)
 
 # This is a list of regions of interest: Every region consist of 2 areas
 # L: Left, R: Right,

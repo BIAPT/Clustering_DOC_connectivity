@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # We assume running this from the script directory
-#MODES=("dpli" "wpli" "AEC")
-MODES=("dpli")
-#FREQUENCIES=("alpha" "theta" "delta")
-#STEPS=("01" "10")
-STEPS=("01")
-FREQUENCIES=("alpha")
-REP=1
+#MODES=("dpli" "wpli" "aec")
+MODES=("dpli" "wpli")
+FREQUENCIES=("alpha" "theta" "delta")
+STEPS=("01" "10")
+#STEPS=("01")
+#FREQUENCIES=("alpha")
+REP=5
 
 for mode in ${MODES[@]}; do
     for frequency in ${FREQUENCIES[@]}; do
