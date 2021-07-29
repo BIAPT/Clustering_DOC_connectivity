@@ -76,7 +76,7 @@ This step will calculate the time-resolved functional connectivity with a step s
 
 - adapt the output directory in the compute_stability.py (a lot of .txt files will be saved there)
 
-- Run the generate_jobs_step3.bash by typing: ` bash generate_jobs_step3.bash step_3_find_number_of_clusters/job_staility.sl` This will submit one job per condition and repetition. It will take a bit of time. 
+- Run the generate_jobs_step3.bash by typing: ` bash generate_jobs_step3.bash STEP3_find_number_of_clusters/job_stability.sl` This will submit one job per condition and repetition. It will take a bit of time. 
 
 - Once this is done, you can download the folder with all .txt files, move it to the data folder of your local GitHub folder copy and run "summarize_SI.py " This code will output a pdf with the figures
 
