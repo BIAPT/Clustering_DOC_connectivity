@@ -2,12 +2,12 @@
 
 # We assume running this from the script directory
 #MODES=("dpli" "wpli" "AEC")
-MODES=("AEC")
+MODES=("dpli")
 #FREQUENCIES=("alpha" "theta" "delta")
 #STEPS=("01" "10")
 STEPS=("01")
 FREQUENCIES=("alpha")
-REP=50
+REP=1
 
 for mode in ${MODES[@]}; do
     for frequency in ${FREQUENCIES[@]}; do

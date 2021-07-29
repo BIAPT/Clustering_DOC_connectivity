@@ -8,6 +8,7 @@ import sys
 sys.path.append('../')
 import pandas as pd
 import os
+import numpy as np
 
 scriptpath = "."
 sys.path.append(os.path.abspath(scriptpath))
@@ -24,24 +25,29 @@ analysis_param = sys.argv[1]
 
 # this parameter won't change anything is this part of the analysis
 
-OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/new_stability/"
+OUTPUT_DIR = "/home/lotte/projects/def-sblain/lotte/Cluster_DOC/results/stability/"
 
-_, data, X, _, _, _, _, _, _, _, _, _= general.load_data(mode, frequency, step)
+AllPart, data, X, Y_out, info = general.load_data(mode, frequency, step)
 
 Y_ID = data['ID']
 
 """
 Stability Index
 """
-
-
+# define hyperparameter range
 P = [3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
 K = [2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
 
-SI = stability_measure.compute_stability_index(X, Y_ID, P, K, r)
+""" 
+Calculate stability index
+"""
+# Initialize empty frame for 10 repetitions
+SIS = np.empty([len(K), len(P), 10])
+for i in range(10):
+    SIS[:,:,i] = stability_measure.compute_stability_index(X, data['ID'], P, K)
 
 
-pd.DataFrame(SI).to_csv(OUTPUT_DIR + "SI_{}_10_{}_{}_rep_{}.txt".format(mode, step, frequency,r))
+pd.DataFrame(np.mean(SIS,axis=2)).to_csv(OUTPUT_DIR + "SI_{}_10_{}_{}_rep_{}.txt".format(mode, step, frequency,r))
 print('Stability index finished')
 
 """

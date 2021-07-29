@@ -18,7 +18,7 @@ import os
 # Loop over these parameters
 FREQUENCY = ["alpha", "theta", "delta"]
 STEP = ["10", "01"]
-MODE = ["wpli", "dpli", "aec"]
+MODE = ["wpli", "dpli"]
 
 # load participant IDS and information from txt file
 info = pd.read_table("/home/lotte/projects/def-sblain/lotte/Cluster_DOC/data/DOC_Cluster_participants.txt")
