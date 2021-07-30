@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 import matplotlib.backends.backend_pdf
 import helper_functions.General_Information as general
 
-MODES = ['wpli','dpli'] # type of functional connectivity: can be dpli/ wpli / AEC
+#MODES = ['wpli','dpli'] # type of functional connectivity: can be dpli/ wpli / AEC
+MODES = ['aec'] # type of functional connectivity: can be dpli/ wpli / AEC
 frequencies = ['theta', 'alpha', 'delta'] # frequency band: can be alpha/ theta/ delta
 conditions = ['Base']
 STEP = '10' # stepsize: can be '01' or '10'

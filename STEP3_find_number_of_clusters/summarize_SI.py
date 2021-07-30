@@ -11,14 +11,13 @@ import matplotlib.backends.backend_pdf
 import numpy as np
 import pandas as pd
 
-mode = ["dpli", "wpli", "AEC"]
-steps = ["01"]
-frequency = ["alpha"]
-#frequency = ["alpha", "theta", "delta"]
-Rep = 50
-saveimg = True
+mode = ["dpli", "wpli"]
+steps = ["01","10"]
+frequency = ["alpha", "theta", "delta"]
+Rep = 5
+saveimg = False
 
-pdf = matplotlib.backends.backend_pdf.PdfPages("SI_SIS_10_all_frequency_uncut.pdf")
+pdf = matplotlib.backends.backend_pdf.PdfPages("SI_SIS_10_all_frequency.pdf")
 
 P = [3, 4, 5, 6, 7, 8, 9, 10]          #number of Principal components to iterate
 K = [2, 3, 4, 5, 6, 7, 8, 9, 10]       #number of K-clusters to iterate
