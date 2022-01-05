@@ -8,7 +8,7 @@ import numpy as np
 
 def get_data(mode, frequency, step):
 
-    data = pd.read_csv("../data/features/74_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
+    data = pd.read_csv("../data/features/73_Part_{}_10_{}_{}.csv".format(mode, step, frequency))
 
     if data.columns[0] != 'Name':
         del data[data.columns[0]]
@@ -36,10 +36,10 @@ def load_data(mode, frequency, step):
     AllPart["Part"] = list(info["ID"])
     AllPart["Part_heal"] = list(info.query("Healthy==1")["ID"])
     AllPart["Part_nonr"] = list(info.query("NonReco==1")["ID"])
-    AllPart["Part_reco"] = list(info.query("Healthy==1")["ID"])
+    AllPart["Part_reco"] = list(info.query("Reco==1")["ID"])
     AllPart["Part_ncmd"] = list(info.query("NCMD==1")["ID"])
 
-    data = get_data(mode, frequency, step)
+    data = get_data(mode, 'theta', step)
 
     # only keep the participants in AllPart[Part]
     data = data[(data['ID'].apply(str)).isin(AllPart["Part"])]
@@ -53,9 +53,6 @@ def load_data(mode, frequency, step):
     Y_out[data['ID'].isin(AllPart["Part_ncmd"])] = 1
     Y_out[data['ID'].isin(AllPart["Part_reco"])] = 2
     Y_out[data['ID'].isin(AllPart["Part_heal"])] = 3
-
-    #groupnames = ["Nonr_Patients", "CMD_Patients", "Reco_Patients", "Healthy control"]
-    #partnames = ["Part_nonr", "Part_ncmd", "Part_reco", "Part_heal"]
 
     return AllPart, data, X, Y_out, info
 

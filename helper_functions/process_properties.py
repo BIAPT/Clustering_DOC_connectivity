@@ -16,7 +16,7 @@ def calculate_occurence(AllPart,k,P_kmc,data, partnames, groupnames):
     # groupames: List of names of groups (see general information)
 
     # initialize empty dataframe with k columns + ID+ Group
-    occurence = pd.DataFrame(np.empty((len(AllPart["Part"]), k+2)))
+    occurence = pd.DataFrame(np.zeros((len(AllPart["Part"]), k+2)))
 
     # name the columns of the dataframe
     names=["group", "ID"]
@@ -27,28 +27,28 @@ def calculate_occurence(AllPart,k,P_kmc,data, partnames, groupnames):
     # compute the time spent in one phase
     for s in range(k):
         c = 0
-        for t in AllPart["Part"]:
+        for p in AllPart["Part"]:
             # insert group and ID
-            occurence.loc[c, 'ID'] = t
+            occurence.loc[c, 'ID'] = p
 
-            if np.isin(t, AllPart[partnames[0]]):
+            if np.isin(p, AllPart[partnames[0]]):
                 occurence.loc[c, 'group'] = groupnames[0]
 
-            elif np.isin(t, AllPart[partnames[1]]):
+            elif np.isin(p, AllPart[partnames[1]]):
                 occurence.loc[c, 'group'] = groupnames[1]
 
-            elif np.isin(t, AllPart[partnames[2]]):
+            elif np.isin(p, AllPart[partnames[2]]):
                 occurence.loc[c, 'group'] = groupnames[2]
 
-            elif np.isin(t, AllPart[partnames[3]]):
+            elif np.isin(p, AllPart[partnames[3]]):
                 occurence.loc[c, 'group'] = groupnames[3]
 
-            elif np.isin(t, AllPart[partnames[4]]):
+            elif np.isin(p, AllPart[partnames[4]]):
                 occurence.loc[c, 'group'] = groupnames[4]
 
             # calculate and insert occurence
-            occurence.loc[c,str(s)] = (len(np.where((P_kmc == s) & (data['ID'] == t))[0]))\
-                                      /len(np.where(data['ID'] == t)[0])
+            occurence.loc[c,str(s)] = (len(np.where((P_kmc == s) & (data['ID'].apply(str) == p))[0]))\
+                                      /len(np.where(data['ID'].apply(str) == p)[0])
             c += 1
 
     return occurence

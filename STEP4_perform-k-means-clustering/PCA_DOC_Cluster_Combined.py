@@ -20,23 +20,27 @@ import helper_functions.process_properties as prop
 from scipy.stats import pearsonr
 from statsmodels.sandbox.stats.multicomp import multipletests
 
+groupnames = ["Nonr_Patients", "CMD_Patients", "Reco_Patients", "Healthy control"]
+partnames = ["Part_nonr", "Part_ncmd", "Part_reco", "Part_heal"]
 
 """
 Analysis Parameters
 """
-mode = 'AEC' # type of functional connectivity: can be dpli/ wpli
+mode = 'dpli' # type of functional connectivity: can be dpli/ wpli
 frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
 step = '01' # stepsize: can be '01'
 palett = "muted" # color palette
-saveimg = True # if you want to save all images as seperate files
+saveimg = False# if you want to save all images as seperate files
 
 # number of Clusters/ Phases to explore
-k = 6   # numbser of k-clustes
-PC = 8   # number of PC principal components
+k = 5   # numbser of k-clustes
+PC = 7   # number of PC principal components
 
 # load the data
-AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames, Status, Diag, TSI, Age = \
-    general.load_data(mode,frequency, step)
+#AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames, Status, Diag, TSI, Age = \
+#    general.load_data(mode,frequency, step)
+AllPart, data, X, Y_out, info = general.load_data(mode,frequency, step)
+
 
 # set up an empty pdf
 pdf = matplotlib.backends.backend_pdf.PdfPages("{}_{}_P{}_{}_K{}.pdf"
@@ -231,8 +235,8 @@ if saveimg:
 plt.close()
 
 # plot with status
-dynamic['Status'] = Status
-dynamic['Diag'] = Diag
+dynamic['Status'] = info['State']
+dynamic['Diag'] = info['Diag']
 
 fig = plt.figure()
 sns.boxplot(x='p_switch', y="Status", data=dynamic,
@@ -294,10 +298,13 @@ pd.DataFrame(np.vstack((P_kmc,data['ID']))).to_csv("mode_{}_Pkmc_K_{}_P_{}.txt".
     8) Run and plot the Correlation analysis
 """
 
-dyn_DOC = dynamic[np.isin(dynamic['ID'], CRSR_ID)]
-dyn_DOC.loc[:, ('CRSR')]= CRSR_value
-dyn_DOC['TSI']= TSI
-dyn_DOC['Age']= Age
+
+dyn_DOC = dynamic.query("group != 'Healthy control'")
+dyn_DOC.is_copy = None
+dyn_DOC.loc[:,'CRSR'] = np.array(info.query("Healthy == 0")['CRSR'])
+dyn_DOC.loc[:,'TSI'] = np.array(info.query("Healthy == 0")['TSI'])
+dyn_DOC.loc[:,'Age'] = np.array(info.query("Healthy == 0")['Age'])
+dyn_DOC['CRSR']=dyn_DOC['CRSR'].astype(int)
 
 # plot CRSR-transition probability
 fig = plt.figure()
@@ -310,7 +317,7 @@ if saveimg:
 pdf.savefig(fig, bbox_inches='tight')
 plt.close()
 
-# plot TSI-transition probability
+"""# plot TSI-transition probability
 fig = plt.figure()
 corr = pearsonr(dyn_DOC["TSI"], dyn_DOC["p_switch"])
 sns.regplot(x='TSI', y='p_switch', data=dyn_DOC)
@@ -320,7 +327,7 @@ if saveimg:
     plt.savefig("{}_corr_TSI.jpeg".format(mode, k, PC))
 pdf.savefig(fig, bbox_inches='tight')
 plt.close()
-
+"""
 # plot Age-transition probability
 fig = plt.figure()
 corr = pearsonr(dyn_DOC["Age"], dyn_DOC["p_switch"])

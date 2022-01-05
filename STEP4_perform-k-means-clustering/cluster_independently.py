@@ -12,24 +12,18 @@ from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from yellowbrick.cluster import KElbowVisualizer
+import helper_functions.General_Information as general
 
 
-mode = 'AEC' # type of functional connectivity: can be dpli/ wpli
-frequency = 'alpha' # frequency band: can be alpha/ theta/ delta
-step = '01' # stepsize: can be '01' or '10'
+mode = 'wpli' # type of functional connectivity: can be dpli/ wpli
+frequency = 'theta' # frequency band: can be alpha/ theta/ delta
+step = '10' # stepsize: can be '01'
 
-IDS = ['WSAS05', 'WSAS19','WSAS02', 'WSAS07', 'WSAS09', 'WSAS10', 'WSAS11', 'WSAS12', 'WSAS13', 'WSAS15',
-       'WSAS16', 'WSAS17', 'WSAS18', 'WSAS20', 'WSAS22', 'WSAS23',
-       'AOMW03', 'AOMW04', 'AOMW08', 'AOMW22', 'AOMW28', 'AOMW31', 'AOMW34', 'AOMW36',
-       'MDFA03', 'MDFA05', 'MDFA06', 'MDFA07', 'MDFA10', 'MDFA11', 'MDFA12', 'MDFA15', 'MDFA17']
+# load the data
+#AllPart, data, X, Y_out, CRSR_ID, CRSR_value, groupnames, partnames, Status, Diag, TSI, Age = \
+#    general.load_data(mode,frequency, step)
+AllPart, data, X, Y_out, info = general.load_data(mode,frequency, step)
 
-outcome = ['0', '1', '2', '2', '2', '0', '0', '0', '0', '0', '0', '0',
-                        '0', '2', '0', '0',
-                        '1', '0', '1', '2', '1', '1', '1', '0',
-                        '3', '3', '3', '3', '3', '3', '3', '3', '3']
-
-
-INPUT_DIR = "../data/connectivity/new_{}/{}/step{}/".format(frequency, mode, step)
 pdf = matplotlib.backends.backend_pdf.PdfPages(
     "Independent_Cluster_{}_{}_{}.pdf".format(frequency, mode, step))
 
